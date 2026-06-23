@@ -30,7 +30,7 @@ export const DOMAINS: Domain[] = [
     name: "Networking Concepts",
     weight: 23,
     accent: "var(--color-d1)",
-    built: false,
+    built: true,
     blurb:
       "The vocabulary of networking: the OSI model, appliances, ports & protocols, media, topologies, IPv4 addressing & subnetting, and modern environments.",
     objectives: [
