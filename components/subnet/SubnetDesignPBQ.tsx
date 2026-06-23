@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { octetsToInt, networkInt, intToIp, type Octets } from "@/lib/subnet";
 
 const BASES: { ip: Octets; cidr: number }[] = [
@@ -20,6 +20,40 @@ function newScenario() {
   const need = SUBNET_REQS[randInt(SUBNET_REQS.length)];
   const k = 2 + randInt(3); // subnet #2..#4
   return { base, need, k };
+}
+
+// Module-level so it keeps a stable identity across re-renders (otherwise the
+// input remounts on every keystroke and loses focus).
+function Field({
+  label, value, onChange, placeholder, checked, ok,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  checked: boolean;
+  ok: boolean;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-sm text-muted">{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          value={value}
+          disabled={checked}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="h-9 w-full rounded-md border bg-surface-2 px-3 font-mono text-sm text-text focus:border-accent"
+          style={{ borderColor: checked ? (ok ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }}
+        />
+        {checked && (
+          <span className="text-xs" style={{ color: ok ? "var(--color-good)" : "var(--color-bad)" }}>
+            {ok ? "✓" : "✗"}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function SubnetDesignPBQ() {
@@ -55,24 +89,6 @@ export default function SubnetDesignPBQ() {
     setChecked(false);
   }
 
-  function Row({ ok, label, input }: { ok: boolean; label: string; input: ReactNode }) {
-    return (
-      <div>
-        <label className="mb-1 block text-sm text-muted">{label}</label>
-        <div className="flex items-center gap-2">
-          {input}
-          {checked && (
-            <span className="text-xs" style={{ color: ok ? "var(--color-good)" : "var(--color-bad)" }}>
-              {ok ? "✓" : "✗"}
-            </span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  const inputCls = "h-9 w-full rounded-md border bg-surface-2 px-3 font-mono text-sm text-text focus:border-accent";
-
   return (
     <div>
       {/* scenario */}
@@ -85,12 +101,12 @@ export default function SubnetDesignPBQ() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Row ok={prefixOk} label="(a) New prefix length"
-          input={<input value={ans.prefix} disabled={checked} onChange={(e) => setAns((a) => ({ ...a, prefix: e.target.value }))} placeholder="/26" className={inputCls} style={{ borderColor: checked ? (prefixOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />} />
-        <Row ok={hostsOk} label="(b) Usable hosts / subnet"
-          input={<input value={ans.hosts} disabled={checked} onChange={(e) => setAns((a) => ({ ...a, hosts: e.target.value }))} placeholder="62" className={inputCls} style={{ borderColor: checked ? (hostsOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />} />
-        <Row ok={netOk} label={`(c) Network of subnet #${sc.k}`}
-          input={<input value={ans.network} disabled={checked} onChange={(e) => setAns((a) => ({ ...a, network: e.target.value }))} placeholder="10.0.64.0" className={inputCls} style={{ borderColor: checked ? (netOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />} />
+        <Field label="(a) New prefix length" placeholder="/26" checked={checked} ok={prefixOk}
+          value={ans.prefix} onChange={(v) => setAns((a) => ({ ...a, prefix: v }))} />
+        <Field label="(b) Usable hosts / subnet" placeholder="62" checked={checked} ok={hostsOk}
+          value={ans.hosts} onChange={(v) => setAns((a) => ({ ...a, hosts: v }))} />
+        <Field label={`(c) Network of subnet #${sc.k}`} placeholder="10.0.64.0" checked={checked} ok={netOk}
+          value={ans.network} onChange={(v) => setAns((a) => ({ ...a, network: v }))} />
       </div>
 
       <div className="mt-4 flex justify-center gap-2">
