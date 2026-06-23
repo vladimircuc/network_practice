@@ -25,6 +25,24 @@ function Messer({ slug, children }: { slug: string; children: ReactNode }) {
   );
 }
 
+/** scannable "term → plain-English explanation" list used to add depth */
+function DefList({ items }: { items: [string, ReactNode][] }) {
+  return (
+    <dl className="my-3 space-y-2">
+      {items.map(([term, def]) => (
+        <div key={term} className="rounded-lg border border-line-soft bg-surface/40 px-3 py-2 text-sm">
+          <dt className="font-semibold text-text">{term}</dt>
+          <dd className="mt-0.5 leading-relaxed text-muted">{def}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function P({ children }: { children: ReactNode }) {
+  return <p className="mt-3 text-sm leading-relaxed text-muted">{children}</p>;
+}
+
 const JUMP = [
   ["obj-1-1", "1.1 OSI"], ["obj-1-2", "1.2 Appliances"], ["obj-1-3", "1.3 Cloud"],
   ["obj-1-4", "1.4 Ports"], ["obj-1-5", "1.5 Media"], ["obj-1-6", "1.6 Topologies"],
@@ -90,6 +108,22 @@ export default function Page() {
             Switches = <Mono>Layer 2</Mono> (MAC), routers = <Mono>Layer 3</Mono> (IP). The PDU renames at each
             layer: Data → Segment → Packet → Frame → Bits. This was one of your two clean objectives — keep it sharp.
           </Callout>
+          <P>
+            Two framings make it click. The <Term>upper layers</Term> (5–7) are about the application and
+            its data; the <Term>lower layers</Term> (1–4) are about getting that data across the network.
+            When you troubleshoot, you can walk the stack in order — &ldquo;is it plugged in?&rdquo; (L1) up
+            to &ldquo;is the website itself down?&rdquo; (L7).
+          </P>
+          <P>
+            You will also meet the <Term>TCP/IP model</Term>, which squashes OSI&apos;s seven layers into
+            four. Knowing how they line up is a common exam question:
+          </P>
+          <DefList items={[
+            ["Application (TCP/IP) = OSI 5–7", <>The parts users touch — HTTP, DNS, SMTP.</>],
+            ["Transport = OSI 4", <>TCP and UDP, plus port numbers.</>],
+            ["Internet = OSI 3", <>IP addressing and routing between networks.</>],
+            ["Link / Network Access = OSI 1–2", <>Ethernet, MAC addresses, and the physical cabling.</>],
+          ]} />
           <Messer slug="understanding-the-osi-model-n10-009">Understanding the OSI Model</Messer>
         </Section>
 
@@ -117,6 +151,14 @@ export default function Page() {
               </tbody>
             </table>
           </div>
+          <P>A few distinctions worth nailing down:</P>
+          <DefList items={[
+            ["Hub → switch → router", <>A <Term>hub</Term> blindly repeats traffic out every port (one big collision domain, no privacy). A <Term>switch</Term> learns which MAC lives on which port and forwards only there. A <Term>router</Term> connects separate networks and picks the path by IP.</>],
+            ["Stateless vs stateful firewall", <>Stateless checks each packet against fixed rules (ACLs). Stateful tracks whole conversations, so it knows a returning reply belongs to a request you already allowed.</>],
+            ["Forward vs reverse proxy", <>A forward proxy sits in front of <em>users</em> (caching and filtering outbound traffic). A reverse proxy sits in front of <em>servers</em> (hiding them, load-balancing, handling TLS).</>],
+            ["NAS vs SAN", <>A <Term>NAS</Term> shares files over the normal network (like a shared drive). A <Term>SAN</Term> is a dedicated high-speed network that hands raw block storage to servers.</>],
+            ["Wireless LAN controller", <>Centrally manages many access points — push one config to all of them instead of touching each AP by hand.</>],
+          ]} />
           <div className="mt-3 flex flex-wrap gap-2">
             <Messer slug="networking-devices-n10-009">Networking Devices</Messer>
             <Messer slug="networking-functions-n10-009">Networking Functions</Messer>
@@ -131,6 +173,17 @@ export default function Page() {
             describe <em>where</em> it lives: public, private, hybrid, or community.
           </p>
           <DemoFrame title="Who manages what: IaaS / PaaS / SaaS" accent={D1}><CloudStack /></DemoFrame>
+          <P>
+            Beyond who-manages-what, <Term>deployment models</Term> describe where the cloud lives, and a few
+            <Term> characteristics</Term> explain why companies move there:
+          </P>
+          <DefList items={[
+            ["Public / Private / Hybrid / Community", <>Public = shared provider infrastructure (AWS, Azure). Private = dedicated to one organization. Hybrid = a mix, with workloads moving between them. Community = shared by organizations with common needs.</>],
+            ["Elasticity & scalability", <>Resources grow and shrink automatically with demand, so you pay for what you use instead of buying for peak.</>],
+            ["Multitenancy", <>Many customers share the same physical hardware while staying logically isolated from each other.</>],
+            ["Connectivity", <>Reach it over a site-to-site VPN across the internet, or a dedicated private link (Direct Connect / ExpressRoute) for steadier performance.</>],
+            ["VPC & security groups", <>A VPC is your own private slice of the provider&apos;s network; security groups are cloud-side firewalls around your resources.</>],
+          ]} />
           <Messer slug="cloud-models-n10-009">Cloud Models</Messer>
         </Section>
 
@@ -144,6 +197,25 @@ export default function Page() {
             then drill them in the game:
           </p>
           <DemoFrame title="Common ports — reference & match game" caption="Switch to the game and build a streak." accent={D1}><PortsReference /></DemoFrame>
+          <P>
+            <Term>TCP</Term> is connection-oriented: it runs a <Term>three-way handshake</Term> (SYN →
+            SYN-ACK → ACK) before sending, numbers every segment, and retransmits anything lost — reliable,
+            with some overhead. <Term>UDP</Term> just fires datagrams with no setup and no guarantees —
+            less reliable but fast, which is exactly what live voice, video, and quick lookups want.
+          </P>
+          <P>It is much easier to remember the ports grouped by the job they do:</P>
+          <DefList items={[
+            ["Web", <>HTTP <Mono>80</Mono>, HTTPS <Mono>443</Mono> (encrypted).</>],
+            ["Email", <>SMTP <Mono>25</Mono> (send); POP3 <Mono>110</Mono> / IMAP <Mono>143</Mono> (retrieve); secure on <Mono>995</Mono> / <Mono>993</Mono>.</>],
+            ["File transfer", <>FTP <Mono>20/21</Mono>, SFTP <Mono>22</Mono>, TFTP <Mono>69</Mono>, SMB <Mono>445</Mono>.</>],
+            ["Remote access", <>SSH <Mono>22</Mono> (secure), RDP <Mono>3389</Mono>, Telnet <Mono>23</Mono> (insecure).</>],
+            ["Core services", <>DNS <Mono>53</Mono> (names→IPs), DHCP <Mono>67/68</Mono> (auto-addressing), NTP <Mono>123</Mono> (time).</>],
+            ["Management", <>SNMP <Mono>161/162</Mono> (monitoring), Syslog <Mono>514</Mono> (logging), LDAP <Mono>389</Mono> (directory).</>],
+          ]} />
+          <Callout tone="exam" title="Secure vs insecure pairs (a favorite exam trap)">
+            Always prefer the encrypted version: <Mono>SSH 22</Mono> over <Mono>Telnet 23</Mono>,{" "}
+            <Mono>HTTPS 443</Mono> over <Mono>HTTP 80</Mono>, and <Mono>SFTP/FTPS</Mono> over plain <Mono>FTP</Mono>.
+          </Callout>
           <Callout tone="info" title="Traffic types">
             <span className="text-text">Unicast</span> = one-to-one · <span className="text-text">Broadcast</span> = one-to-all (on the subnet) ·
             <span className="text-text"> Multicast</span> = one-to-many (subscribers) · <span className="text-text">Anycast</span> = one-to-nearest.
@@ -183,6 +255,14 @@ export default function Page() {
           <Callout tone="info" title="Connectors to recognize">
             Copper: <Mono>RJ45</Mono> (Ethernet). Fiber: <Mono>LC</Mono>, <Mono>SC</Mono>, <Mono>ST</Mono>, <Mono>MPO</Mono>. Coax: <Mono>F-type</Mono>, <Mono>BNC</Mono>.
           </Callout>
+          <P>The detail behind the table:</P>
+          <DefList items={[
+            ["UTP vs STP", <>Unshielded twisted pair (UTP) is the common, cheap choice. Shielded (STP) adds a foil or braid to fight interference in noisy spots — factory floors, near big motors.</>],
+            ["Single-mode vs multimode fiber", <>Single-mode has a tiny core and uses a laser for very long distances (yellow jacket). Multimode has a larger core and uses LED light for shorter runs (aqua or orange).</>],
+            ["Why pick fiber", <>Immune to electrical interference, very hard to tap, huge bandwidth, and reaches far past copper&apos;s ~100 m — at higher cost and more careful handling.</>],
+            ["Transceivers (SFP / SFP+ / QSFP)", <>Hot-swappable modules that plug media into a switch: SFP ≈ 1 Gbps, SFP+ ≈ 10 Gbps, QSFP/QSFP+ ≈ 40 Gbps and up.</>],
+            ["Termination standards", <>Copper is wired to the T568A or T568B pinout — the rule is simply to be consistent on both ends of a run.</>],
+          ]} />
           <div className="flex flex-wrap gap-2">
             <Messer slug="copper-cabling-n10-009">Copper Cabling</Messer>
             <Messer slug="optical-fiber-n10-009">Optical Fiber</Messer>
@@ -200,6 +280,14 @@ export default function Page() {
             traffic, versus <em>north-south</em> (in-and-out) traffic.
           </p>
           <DemoFrame title="Pick a topology" accent={D1}><TopologySwitcher /></DemoFrame>
+          <P>Also know the <Term>sizes</Term> of networks and the <Term>architectures</Term> used to build big ones:</P>
+          <DefList items={[
+            ["Network types by size", <>PAN (your desk, e.g. Bluetooth) → LAN (a building) → WLAN (the Wi-Fi version) → CAN (a campus) → MAN (a city) → WAN (across cities / the internet).</>],
+            ["Three-tier hierarchy", <>Big campus networks layer into core (fast backbone), distribution (routing and policy), and access (where devices plug in).</>],
+            ["Collapsed core", <>Smaller networks merge the core and distribution tiers into one to save money.</>],
+            ["Spine-leaf", <>Data-center design where every leaf switch connects to every spine — predictable, low-latency east-west (server-to-server) traffic.</>],
+            ["SD-WAN", <>Manages multiple WAN links (broadband, MPLS, LTE) through software, steering each app over the best path.</>],
+          ]} />
           <div className="flex flex-wrap gap-2">
             <Messer slug="network-topologies-n10-009">Network Topologies</Messer>
             <Messer slug="network-architectures-n10-009">Network Architectures</Messer>
