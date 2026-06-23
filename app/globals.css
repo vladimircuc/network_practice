@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------------------
+   Network+ Prep — design system (dark, technical, high-contrast for teaching)
+   Tailwind v4 CSS-first config: tokens here become utilities (bg-surface, etc.)
+---------------------------------------------------------------------------- */
+@theme {
+  /* surfaces */
+  --color-bg: #080b12;
+  --color-surface: #111726;
+  --color-surface-2: #18202f;
+  --color-surface-3: #202a3b;
+  --color-line: #2a3447;
+  --color-line-soft: #1c2433;
+
+  /* text */
+  --color-text: #e9edf5;
+  --color-muted: #9fabc1;
+  --color-faint: #66738c;
+
+  /* brand accent */
+  --color-accent: #45c4ff;
+  --color-accent-2: #7df0ff;
+
+  /* live scoring (red / amber / green) */
+  --color-bad: #ef4444;
+  --color-partial: #f5a623;
+  --color-good: #2fcf6b;
+
+  /* per-domain hues */
+  --color-d1: #3b82f6;
+  --color-d2: #a855f7;
+  --color-d3: #14b8a6;
+  --color-d4: #fb5e7e;
+  --color-d5: #f59e0b;
+
+  /* fonts (Geist injected by next/font in layout.tsx) */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(900px 520px at 100% -10%, color-mix(in oklab, var(--color-d1) 11%, transparent), transparent 70%),
+    radial-gradient(820px 520px at -8% -4%, color-mix(in oklab, var(--color-accent) 9%, transparent), transparent 70%);
+  background-attachment: fixed;
+  color: var(--color-text);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 32%, transparent);
+}
+
+/* thin themed scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+*::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 9999px;
+}
+
+/* focus ring for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@layer utilities {
+  /* faint dotted grid used behind some diagrams */
+  .bg-grid {
+    background-image: radial-gradient(var(--color-line-soft) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
