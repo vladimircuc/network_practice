@@ -27,6 +27,9 @@
   --color-partial: #f5a623;
   --color-good: #2fcf6b;
 
+  /* IP & Subnetting lab accent (distinct from the domains) */
+  --color-lab: #22d3ee;
+
   /* per-domain hues */
   --color-d1: #3b82f6;
   --color-d2: #a855f7;
@@ -49,7 +52,7 @@ body {
   background-image:
     radial-gradient(900px 520px at 100% -10%, color-mix(in oklab, var(--color-d1) 11%, transparent), transparent 70%),
     radial-gradient(820px 520px at -8% -4%, color-mix(in oklab, var(--color-accent) 9%, transparent), transparent 70%);
-  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--color-text);
 }
 

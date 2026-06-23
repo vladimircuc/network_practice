@@ -7,15 +7,30 @@ import { DOMAINS } from "@/lib/domains";
 export default function TabNav() {
   const pathname = usePathname();
 
-  const tabs = [
-    { href: "/", label: "Overview", num: null as number | null, accent: "var(--color-accent)" },
-    ...DOMAINS.map((d) => ({
-      href: `/${d.slug}`,
-      label: d.short,
-      num: d.num,
-      accent: d.accent,
-    })),
+  type Tab = {
+    href: string;
+    label: string;
+    num: number | null;
+    badge?: string;
+    accent: string;
+  };
+
+  const tabs: Tab[] = [
+    { href: "/", label: "Overview", num: null, accent: "var(--color-accent)" },
   ];
+  for (const d of DOMAINS) {
+    tabs.push({ href: `/${d.slug}`, label: d.short, num: d.num, accent: d.accent });
+    if (d.num === 1) {
+      // standalone IP & Subnetting lab sits right after Domain 1
+      tabs.push({
+        href: "/ip-subnetting",
+        label: "IP & Subnetting",
+        num: null,
+        badge: "/",
+        accent: "var(--color-lab)",
+      });
+    }
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
@@ -41,7 +56,7 @@ export default function TabNav() {
                 className="group relative flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                 style={{ color: active ? t.accent : "var(--color-muted)" }}
               >
-                {t.num !== null && (
+                {(t.num !== null || t.badge) && (
                   <span
                     className="grid h-5 w-5 place-items-center rounded font-mono text-[11px] font-bold tabular"
                     style={{
@@ -49,7 +64,7 @@ export default function TabNav() {
                       backgroundColor: `color-mix(in oklab, ${t.accent} ${active ? 22 : 12}%, transparent)`,
                     }}
                   >
-                    {t.num}
+                    {t.num ?? t.badge}
                   </span>
                 )}
                 <span className={active ? "" : "group-hover:text-text"}>
