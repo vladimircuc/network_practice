@@ -157,3 +157,25 @@ export function Mono({ children }: { children: ReactNode }) {
     </code>
   );
 }
+
+/** Collapsible "go deeper" box — heavier/optional material the student can skip. */
+export function Advanced({
+  title = "Go deeper — the hand-math (optional)",
+  children,
+}: {
+  title?: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="my-4 overflow-hidden rounded-lg border border-line-soft bg-surface/40">
+      <summary className="flex cursor-pointer items-center gap-2 px-4 py-3 text-sm font-medium text-muted hover:text-text">
+        <span className="np-chev text-faint" aria-hidden>▸</span>
+        {title}
+        <span className="ml-auto rounded-full bg-surface-3 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-faint">
+          optional
+        </span>
+      </summary>
+      <div className="border-t border-line-soft p-4">{children}</div>
+    </details>
+  );
+}

@@ -91,3 +91,17 @@ body {
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* collapsible <Advanced> boxes */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+.np-chev {
+  transition: transform 0.15s ease;
+}
+details[open] > summary .np-chev {
+  transform: rotate(90deg);
+}

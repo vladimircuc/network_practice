@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { describe, octetsToInt, type Octets } from "@/lib/subnet";
 
-const CIDRS = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30];
+const EASY_CIDRS = [24, 25, 26, 27, 28]; // subnetting stays in the last octet
+const HARD_CIDRS = [17, 18, 19, 20, 21, 22, 23]; // crosses into the 3rd octet
 const FIELDS = [
   { key: "network", label: "Network address" },
   { key: "broadcast", label: "Broadcast address" },
@@ -14,7 +15,8 @@ const FIELDS = [
 
 type FieldKey = (typeof FIELDS)[number]["key"];
 
-function randProblem(): { octets: Octets; cidr: number } {
+function randProblem(mode: "easy" | "harder"): { octets: Octets; cidr: number } {
+  const pool = mode === "easy" ? EASY_CIDRS : HARD_CIDRS;
   return {
     octets: [
       [10, 172, 192][Math.floor(Math.random() * 3)],
@@ -22,15 +24,16 @@ function randProblem(): { octets: Octets; cidr: number } {
       Math.floor(Math.random() * 256),
       Math.floor(Math.random() * 256),
     ] as Octets,
-    cidr: CIDRS[Math.floor(Math.random() * CIDRS.length)],
+    cidr: pool[Math.floor(Math.random() * pool.length)],
   };
 }
 
 export default function SubnetPractice() {
+  const [mode, setMode] = useState<"easy" | "harder">("easy");
   // deterministic first problem (avoids hydration mismatch); randomizes on New problem
   const [problem, setProblem] = useState<{ octets: Octets; cidr: number }>({
-    octets: [192, 168, 10, 0],
-    cidr: 26,
+    octets: [192, 168, 1, 0],
+    cidr: 24,
   });
   const [answers, setAnswers] = useState<Record<FieldKey, string>>({
     network: "", broadcast: "", firstUsable: "", lastUsable: "", usableHosts: "",
@@ -63,13 +66,36 @@ export default function SubnetPractice() {
   }
 
   function next() {
-    setProblem(randProblem());
+    setProblem(randProblem(mode));
+    setAnswers({ network: "", broadcast: "", firstUsable: "", lastUsable: "", usableHosts: "" });
+    setChecked(false);
+  }
+  function changeMode(m: "easy" | "harder") {
+    setMode(m);
+    setProblem(randProblem(m));
     setAnswers({ network: "", broadcast: "", firstUsable: "", lastUsable: "", usableHosts: "" });
     setChecked(false);
   }
 
   return (
     <div>
+      <div className="mb-3 flex items-center gap-1 rounded-lg border border-line bg-surface-2 p-1 text-xs font-medium">
+        {(["easy", "harder"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => changeMode(m)}
+            className="flex-1 rounded-md px-3 py-1.5 transition-colors"
+            style={{
+              backgroundColor: mode === m ? "var(--color-surface-3)" : "transparent",
+              color: mode === m ? "var(--color-text)" : "var(--color-faint)",
+            }}
+          >
+            {m === "easy" ? "Easy — last octet" : "Harder — 3rd octet"}
+          </button>
+        ))}
+      </div>
+
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span className="text-xs text-faint">Solve for this network</span>
