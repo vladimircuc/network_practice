@@ -68,7 +68,7 @@ export const DOMAINS: Domain[] = [
     name: "Network Operations",
     weight: 19,
     accent: "var(--color-d3)",
-    built: false,
+    built: true,
     blurb:
       "Running the network: organizational processes, monitoring (SNMP, syslog, SIEM), disaster recovery, IPv4/IPv6 services (DHCP, DNS, NTP), and access/management methods.",
     objectives: [
