@@ -50,6 +50,15 @@ function DefList({ items }: { items: [string, ReactNode][] }) {
 function PbqBadge() {
   return <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: D2, backgroundColor: "color-mix(in oklab, var(--color-d2) 16%, transparent)" }}>PBQ</span>;
 }
+function Analogy({ children }: { children: ReactNode }) {
+  return (
+    <div className="my-3 flex gap-2.5 rounded-lg border px-3 py-2.5 text-sm leading-relaxed text-muted"
+      style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, transparent)", backgroundColor: "color-mix(in oklab, var(--color-d2) 7%, transparent)" }}>
+      <span aria-hidden>💡</span>
+      <span><span className="font-semibold text-text">Think of it like:</span> {children}</span>
+    </div>
+  );
+}
 
 const JUMP = [["obj-2-1", "2.1 Routing"], ["obj-2-2", "2.2 Switching"], ["obj-2-3", "2.3 Wireless"], ["obj-2-4", "2.4 Physical"], ["pbqs", "PBQ gauntlet"]];
 
@@ -78,6 +87,11 @@ export default function Page() {
             ["2. Administrative distance (AD)", <>If prefixes tie, the most <em>trusted</em> source wins (lower AD): Connected 0 &lt; Static 1 &lt; EIGRP 90 &lt; OSPF 110 &lt; RIP 120.</>],
             ["3. Metric", <>Within one protocol, the lowest metric (OSPF cost, RIP hops, EIGRP bandwidth+delay) wins.</>],
           ]} />
+          <Analogy>
+            asking for directions. &ldquo;123 Main St&rdquo; (a <Mono>/24</Mono>) is more specific than &ldquo;that
+            neighborhood&rdquo; (a <Mono>/16</Mono>), so the router follows the exact address. Administrative distance is
+            like trusting your GPS over a stranger when the two give conflicting directions.
+          </Analogy>
           <DemoFrame title="Watch the router choose a route" accent={D2}><RoutingDecision /></DemoFrame>
 
           <P>Know the routing protocols by type, trust level (AD), and where they&apos;re used:</P>
@@ -101,10 +115,14 @@ export default function Page() {
           <P>Two more 2.1 staples — address translation and gateway redundancy — plus bandwidth control:</P>
           <DefList items={[
             ["NAT / PAT", <>NAT swaps private addresses for public ones at the edge. <Term>PAT</Term> (what home routers do) maps many private hosts to one public IP using port numbers.</>],
-            ["FHRP (VRRP / HSRP)", <>Two routers share one <Term>virtual IP</Term> as the gateway; if the active one dies, the standby takes over instantly — no client reconfiguration.</>],
+            ["FHRP (VRRP / HSRP)", <>Two routers share one <Term>virtual IP</Term> as the gateway; if the active one dies, the standby takes over instantly — no client reconfiguration. Like two backup generators on one outlet: the standby kicks in and nobody notices.</>],
             ["Subinterfaces", <>One physical router port split into logical interfaces (one per VLAN) — &ldquo;router-on-a-stick&rdquo; inter-VLAN routing.</>],
             ["QoS & traffic shaping", <>Mark and prioritize traffic (voice/video over bulk downloads) and cap rates so latency-sensitive apps stay smooth.</>],
           ]} />
+          <Analogy>
+            an office switchboard. Everyone inside shares one public phone number, and the receptionist tracks
+            extensions (port numbers) so each reply gets routed back to the right desk.
+          </Analogy>
           <DemoFrame title="PAT: many private hosts, one public IP" accent={D2}><NatPat /></DemoFrame>
 
           <div className="rounded-xl border p-4" style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, var(--color-line))" }}>
@@ -127,6 +145,11 @@ export default function Page() {
             switch host several isolated networks (separate broadcast domains). An <Term>access port</Term> belongs to one
             VLAN; a <Term>trunk</Term> carries many between switches using <Mono>802.1Q</Mono> tags.
           </P>
+          <Analogy>
+            one office building split into departments with keycard doors. Same building (one switch), but HR
+            can&apos;t wander into Finance without going through a controlled route (a router). A <Term>trunk</Term> is the
+            elevator that carries people from every floor at once — each with a tag saying which floor they belong to.
+          </Analogy>
           <DemoFrame title="VLANs, trunks & who can talk to whom" accent={D2}><VlanTrunkLab /></DemoFrame>
           <DefList items={[
             ["Native VLAN", <>The one untagged VLAN on a trunk — it must match on both ends or frames cross into the wrong VLAN.</>],
@@ -139,6 +162,11 @@ export default function Page() {
             <Term>Spanning Tree (STP/RSTP)</Term> prevents switching loops by electing a <Term>root bridge</Term> (lowest
             bridge ID = priority, then MAC) and blocking redundant links until needed.
           </P>
+          <Analogy>
+            a road grid with backup roads. To stop cars from looping forever, the network picks one main hub (the
+            root) and temporarily closes a redundant road (blocks a port) — keeping it on standby to reopen the moment
+            a main road fails.
+          </Analogy>
           <DemoFrame title="Elect the root bridge" accent={D2}><StpVisualizer /></DemoFrame>
           <DefList items={[
             ["Port states", <>Blocking → Listening → Learning → Forwarding (RSTP collapses these for faster convergence).</>],
@@ -212,6 +240,10 @@ export default function Page() {
             </table>
           </div>
           <P>The 2.4 GHz band only has room for three non-overlapping channels — get this wrong and APs jam each other:</P>
+          <Analogy>
+            radio stations. Two stations broadcasting on frequencies too close together garble each other —
+            channels 1, 6, and 11 are spaced far enough apart to stay crisp.
+          </Analogy>
           <DemoFrame title="2.4 GHz channel overlap" accent={D2}><ChannelOverlapChart /></DemoFrame>
           <DefList items={[
             ["SSID / BSSID / ESSID", <>SSID = the network name; BSSID = a specific AP&apos;s radio MAC; ESSID = the same SSID shared across many APs for seamless roaming.</>],
