@@ -51,7 +51,7 @@ export const DOMAINS: Domain[] = [
     name: "Network Implementation",
     weight: 20,
     accent: "var(--color-d2)",
-    built: false,
+    built: true,
     blurb:
       "Building the network: routing technologies, switching features (VLANs, STP, PoE), wireless devices and standards, and physical installation factors.",
     objectives: [
