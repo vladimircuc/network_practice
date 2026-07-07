@@ -23,39 +23,52 @@ export default function RtoRpoTimeline() {
 
   const rpo = backupH;
   const rto = SITES[site].rtoH;
-  const rpoPct = Math.min(45, Math.max(6, (rpo / 24) * 45));
-  const rtoPct = Math.min(45, Math.max(6, (rto / 48) * 45));
+  // one shared scale (≈48 h → 45%) so equal durations render at equal widths
+  const K = 45 / 48;
+  const rpoPct = Math.min(45, Math.max(7, rpo * K));
+  const rtoPct = Math.min(45, Math.max(7, rto * K));
+  const total = rpoPct + rtoPct;
+  const failLeft = (rpoPct / total) * 100;
 
   return (
     <div>
       <p className="mb-4 text-sm leading-relaxed text-muted">
         At the moment of failure, two clocks matter: how much <span style={{ color: RPO_COLOR }}>data you lose</span>{" "}
-        (back to your last backup) and how long you&apos;re <span style={{ color: RTO_COLOR }}>down</span> (until you&apos;re running again).
+        (back to your last backup) and how long you&apos;re <span style={{ color: RTO_COLOR }}>down</span> (until you&apos;re
+        running again). Both bars share one time scale, so their lengths compare directly.
       </p>
 
-      {/* timeline */}
-      <div className="flex items-stretch">
-        <div className="flex flex-col items-end justify-center rounded-l-md border border-r-0 border-line-soft px-2 py-3 text-right" style={{ width: `${rpoPct}%`, backgroundColor: `color-mix(in oklab, ${RPO_COLOR} 14%, transparent)` }}>
-          <span className="text-[10px] uppercase tracking-wider" style={{ color: RPO_COLOR }}>RPO</span>
-          <span className="font-mono text-sm font-bold text-text">{fmt(rpo)}</span>
-          <span className="text-[10px] text-faint">data lost</span>
+      {/* timeline — RPO measures back to the last backup, RTO forward to recovery */}
+      <div className="relative mx-auto" style={{ width: `${total}%`, minWidth: 260 }}>
+        {/* failure marker sits on the boundary between the two bars */}
+        <div className="relative mb-1 h-4">
+          <span className="absolute -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold text-bad" style={{ left: `${failLeft}%` }}>✕ failure</span>
         </div>
-        <div className="z-10 -mx-px flex w-px flex-col items-center justify-center">
-          <div className="h-full w-0.5 bg-bad" />
+        <div className="flex items-stretch">
+          <div className="flex flex-col items-end justify-center rounded-l-md border border-r-0 border-line-soft px-2 py-3 text-right" style={{ width: `${failLeft}%`, backgroundColor: `color-mix(in oklab, ${RPO_COLOR} 14%, transparent)` }}>
+            <span className="text-[10px] uppercase tracking-wider" style={{ color: RPO_COLOR }}>RPO</span>
+            <span className="font-mono text-sm font-bold text-text">{fmt(rpo)}</span>
+            <span className="text-[10px] text-faint">data lost</span>
+          </div>
+          <div className="z-10 w-0.5 shrink-0 bg-bad" />
+          <div className="flex flex-1 flex-col items-start justify-center rounded-r-md border border-l-0 border-line-soft px-2 py-3" style={{ backgroundColor: `color-mix(in oklab, ${RTO_COLOR} 14%, transparent)` }}>
+            <span className="text-[10px] uppercase tracking-wider" style={{ color: RTO_COLOR }}>RTO</span>
+            <span className="font-mono text-sm font-bold text-text">{fmt(rto)}</span>
+            <span className="text-[10px] text-faint">downtime</span>
+          </div>
         </div>
-        <div className="flex flex-col items-start justify-center border border-l-0 border-line-soft px-2 py-3" style={{ width: `${rtoPct}%`, backgroundColor: `color-mix(in oklab, ${RTO_COLOR} 14%, transparent)` }}>
-          <span className="text-[10px] uppercase tracking-wider" style={{ color: RTO_COLOR }}>RTO</span>
-          <span className="font-mono text-sm font-bold text-text">{fmt(rto)}</span>
-          <span className="text-[10px] text-faint">downtime</span>
+        {/* edge labels under their true positions */}
+        <div className="mt-1 flex justify-between text-[10px] text-faint">
+          <span>↤ last backup</span>
+          <span>recovered ↦</span>
         </div>
-        <div className="flex flex-1 items-center pl-3 text-xs text-faint">← last backup &nbsp;·&nbsp; <span className="px-1 font-semibold text-bad">✕ failure</span> &nbsp;·&nbsp; recovered →</div>
       </div>
 
       {/* controls */}
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div>
           <div className="mb-1 flex justify-between text-xs"><span className="text-muted">Backup every</span><span className="font-mono font-bold" style={{ color: RPO_COLOR }}>{fmt(backupH)}</span></div>
-          <input type="range" min={1} max={24} value={backupH} onChange={(e) => setBackupH(Number(e.target.value))} className="w-full" style={{ accentColor: RPO_COLOR }} />
+          <input type="range" min={1} max={24} value={backupH} aria-label="Backup interval in hours" onChange={(e) => setBackupH(Number(e.target.value))} className="w-full" style={{ accentColor: RPO_COLOR }} />
           <p className="mt-1 text-[11px] text-faint">More frequent backups → smaller RPO (less data lost).</p>
         </div>
         <div>

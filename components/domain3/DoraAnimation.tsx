@@ -22,7 +22,6 @@ export default function DoraAnimation() {
       <ol className="space-y-2">
         {DORA.map((s, i) => {
           const shown = i < step;
-          const clientToServer = s.letter === "D" || s.letter === "R";
           return (
             <li key={s.letter} className="rounded-lg border px-3 py-2 transition-all"
               style={{
@@ -33,7 +32,7 @@ export default function DoraAnimation() {
               <div className="flex items-center gap-2">
                 <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold" style={{ color: D3, backgroundColor: `color-mix(in oklab, ${D3} 16%, transparent)` }}>{s.letter}</span>
                 <span className="text-sm font-semibold text-text">{s.name}</span>
-                <span className="ml-auto font-mono text-[11px] text-faint">{clientToServer ? "→" : "←"} {s.from}</span>
+                <span className="ml-auto font-mono text-[11px] text-faint">{s.from}</span>
               </div>
               {shown && <p className="mt-1 pl-8 text-xs leading-relaxed text-muted">{s.desc}</p>}
             </li>

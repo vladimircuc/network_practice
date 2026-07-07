@@ -51,7 +51,7 @@ export default function ChannelOverlapChart() {
         {chans.map((ch, i) => (
           <div key={i} className="flex items-center gap-2">
             <span className="text-xs font-semibold" style={{ color: COLORS[i] }}>AP{i + 1}</span>
-            <select value={ch} onChange={(e) => setChans((c) => c.map((v, j) => j === i ? Number(e.target.value) : v))}
+            <select value={ch} aria-label={`AP${i + 1} channel`} onChange={(e) => setChans((c) => c.map((v, j) => j === i ? Number(e.target.value) : v))}
               className="h-8 flex-1 rounded-md border border-line bg-surface-2 px-2 font-mono text-xs text-text">
               {CHANNELS_24.map((c) => <option key={c} value={c}>Ch {c}</option>)}
             </select>

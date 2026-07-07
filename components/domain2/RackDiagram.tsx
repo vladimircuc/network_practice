@@ -22,7 +22,7 @@ export default function RackDiagram() {
         <div className="mb-1 text-center text-[10px] font-semibold uppercase tracking-wider text-faint">42U Rack</div>
         <div className="space-y-1">
           {UNITS.map((x, i) => (
-            <button key={i} type="button" onClick={() => setSel(i)}
+            <button key={i} type="button" onClick={() => setSel(i)} aria-pressed={sel === i} aria-label={`${x.name}, ${x.u}U`}
               className="flex w-full items-center justify-between rounded px-2 text-left font-mono text-[11px] font-semibold transition-colors"
               style={{
                 height: `${x.u * 22}px`,

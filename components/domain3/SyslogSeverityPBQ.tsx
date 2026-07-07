@@ -27,6 +27,7 @@ export default function SyslogSeverityPBQ() {
   const [checked, setChecked] = useState(false);
 
   const score = items.filter((it, i) => picks[i] === it.level).length;
+  const allAnswered = items.every((_, i) => picks[i] !== undefined);
   function regen() { setItems(shuffle(POOL).slice(0, 5)); setPicks({}); setChecked(false); }
 
   return (
@@ -39,7 +40,7 @@ export default function SyslogSeverityPBQ() {
           return (
             <div key={i} className="flex flex-wrap items-center gap-2">
               <span className="flex-1 text-sm text-text">{it.text}</span>
-              <select value={picks[i] ?? ""} disabled={checked} onChange={(e) => setPicks((p) => ({ ...p, [i]: Number(e.target.value) }))}
+              <select value={picks[i] ?? ""} disabled={checked} aria-label={`Severity for: ${it.text}`} onChange={(e) => setPicks((p) => ({ ...p, [i]: Number(e.target.value) }))}
                 className="h-9 rounded-md border bg-surface-2 px-2 text-sm text-text"
                 style={{ borderColor: checked ? (ok ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }}>
                 <option value="">severity…</option>
@@ -52,8 +53,8 @@ export default function SyslogSeverityPBQ() {
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        {checked ? <span className="text-sm font-semibold" style={{ color: score === items.length ? "var(--color-good)" : "var(--color-text)" }}>{score} / {items.length} correct</span> : <span />}
-        <button type="button" onClick={() => (checked ? regen() : setChecked(true))} className="rounded-lg px-5 py-2 text-sm font-semibold text-white" style={{ backgroundColor: checked ? "var(--color-surface-3)" : D3 }}>
+        {checked ? <span className="text-sm font-semibold" style={{ color: score === items.length ? "var(--color-good)" : "var(--color-text)" }}>{score} / {items.length} correct</span> : <span className="text-xs text-faint">{allAnswered ? "" : "Rate every message to check."}</span>}
+        <button type="button" disabled={!checked && !allAnswered} onClick={() => (checked ? regen() : setChecked(true))} className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-40" style={{ backgroundColor: checked ? "var(--color-surface-3)" : D3 }}>
           {checked ? "New logs →" : "Check"}
         </button>
       </div>

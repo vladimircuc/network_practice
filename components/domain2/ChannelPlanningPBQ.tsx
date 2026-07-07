@@ -49,7 +49,7 @@ export default function ChannelPlanningPBQ() {
             {chans.map((ch, i) => (
               <div key={i} className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-muted">AP{i + 1}</span>
-                <select value={ch} disabled={checked} onChange={(e) => setChans((c) => c.map((v, j) => j === i ? Number(e.target.value) : v))}
+                <select value={ch} disabled={checked} aria-label={`AP${i + 1} channel`} onChange={(e) => setChans((c) => c.map((v, j) => j === i ? Number(e.target.value) : v))}
                   className="h-8 flex-1 rounded-md border border-line bg-surface-2 px-2 font-mono text-xs text-text">
                   {OPTS.map((o) => <option key={o} value={o}>Ch {o}</option>)}
                 </select>

@@ -42,17 +42,17 @@ export default function PoeBudgetPBQ() {
 
       <div className="space-y-3">
         <Row label="(a) Total PoE draw (W)?" ok={drawOk} bad={checked && !drawOk} answer={`${total} W`}>
-          <input value={draw} disabled={checked} onChange={(e) => setDraw(e.target.value)} placeholder="watts" className={inp}
+          <input value={draw} disabled={checked} aria-label="Total PoE draw in watts" onChange={(e) => setDraw(e.target.value)} placeholder="watts" className={inp}
             style={{ borderColor: checked ? (drawOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />
         </Row>
         <Row label="(b) Does it fit the budget?" ok={fitsOk} bad={checked && !fitsOk} answer={ok ? "yes" : "no"}>
-          <select value={fits} disabled={checked} onChange={(e) => setFits(e.target.value)} className={inp}
+          <select value={fits} disabled={checked} aria-label="Does the load fit the budget?" onChange={(e) => setFits(e.target.value)} className={inp}
             style={{ borderColor: checked ? (fitsOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }}>
             <option value="">?</option><option value="yes">Yes</option><option value="no">No</option>
           </select>
         </Row>
         <Row label="(c) How many more 25 W APs fit?" ok={moreOk} bad={checked && !moreOk} answer={String(moreAps)}>
-          <input value={more} disabled={checked} onChange={(e) => setMore(e.target.value)} placeholder="count" className={inp}
+          <input value={more} disabled={checked} aria-label="How many more 25 W APs fit" onChange={(e) => setMore(e.target.value)} placeholder="count" className={inp}
             style={{ borderColor: checked ? (moreOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />
         </Row>
       </div>

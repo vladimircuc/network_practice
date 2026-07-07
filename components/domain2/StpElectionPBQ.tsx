@@ -85,7 +85,7 @@ function Pick({ label, value, onChange, options, ok, bad, answer, checked }: {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="w-56 shrink-0 text-sm text-muted">{label}</span>
-      <select value={value} disabled={checked} onChange={(e) => onChange(e.target.value)}
+      <select value={value} disabled={checked} aria-label={label} onChange={(e) => onChange(e.target.value)}
         className="h-9 rounded-md border bg-surface-2 px-2 font-mono text-sm text-text"
         style={{ borderColor: checked ? (ok ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }}>
         <option value="">choose…</option>

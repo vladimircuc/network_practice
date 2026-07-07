@@ -50,10 +50,10 @@ export default function DhcpScopePBQ() {
 
       <div className="space-y-3">
         <Row label="(a) Total addresses in the pool?" ok={poolOk} bad={checked && !poolOk} answer={String(poolSize)}>
-          <input value={pool} disabled={checked} onChange={(e) => setPool(e.target.value)} placeholder="count" className={inp} style={{ borderColor: checked ? (poolOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />
+          <input value={pool} disabled={checked} aria-label="Total addresses in the pool" onChange={(e) => setPool(e.target.value)} placeholder="count" className={inp} style={{ borderColor: checked ? (poolOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />
         </Row>
         <Row label="(b) Dynamic leases still available?" ok={availOk} bad={checked && !availOk} answer={String(usable)}>
-          <input value={avail} disabled={checked} onChange={(e) => setAvail(e.target.value)} placeholder="count" className={inp} style={{ borderColor: checked ? (availOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />
+          <input value={avail} disabled={checked} aria-label="Dynamic leases still available" onChange={(e) => setAvail(e.target.value)} placeholder="count" className={inp} style={{ borderColor: checked ? (availOk ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }} />
         </Row>
       </div>
 

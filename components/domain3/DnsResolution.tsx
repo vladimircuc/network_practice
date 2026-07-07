@@ -21,7 +21,8 @@ export default function DnsResolution() {
     <div>
       <div className="mb-4 flex flex-wrap justify-center gap-1.5">
         {NODES.map((n, i) => {
-          const active = step > 0 && (i <= 1 || i + 1 === step + 1 || (step >= 4 && i <= 1));
+          // cumulative: light up every node the resolver has reached so far
+          const active = step > 0 && i <= Math.min(step, NODES.length - 1);
           return (
             <span key={n} className="rounded-md border px-2 py-1 text-[11px] transition-colors"
               style={{ borderColor: active ? D3 : "var(--color-line)", color: active ? "var(--color-text)" : "var(--color-faint)", backgroundColor: active ? `color-mix(in oklab, ${D3} 10%, transparent)` : "transparent" }}>

@@ -76,6 +76,7 @@ export const WIFI_STANDARDS: WifiStd[] = [
   { std: "802.11n", gen: "Wi-Fi 4", bands: "2.4 & 5 GHz", maxRate: "600 Mbps", year: "2009" },
   { std: "802.11ac", gen: "Wi-Fi 5", bands: "5 GHz", maxRate: "~6.9 Gbps", year: "2013" },
   { std: "802.11ax", gen: "Wi-Fi 6 / 6E", bands: "2.4 / 5 / 6 GHz", maxRate: "~9.6 Gbps", year: "2019" },
+  { std: "802.11be", gen: "Wi-Fi 7", bands: "2.4 / 5 / 6 GHz", maxRate: "~46 Gbps", year: "2024" },
 ];
 
 export const CHANNELS_24 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];

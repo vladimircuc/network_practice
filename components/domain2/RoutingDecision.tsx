@@ -11,9 +11,12 @@ const TABLE: Route[] = [
   { network: "10.0.0.0", cidr: 8, ad: 120, nextHop: "10.0.0.1", protocol: "RIP" },
   { network: "10.10.0.0", cidr: 16, ad: 110, nextHop: "10.0.0.2", protocol: "OSPF" },
   { network: "10.10.5.0", cidr: 24, ad: 1, nextHop: "10.0.0.3", protocol: "Static" },
+  { network: "10.10.8.0", cidr: 24, ad: 110, nextHop: "10.0.0.4", protocol: "OSPF" },
+  { network: "10.10.8.0", cidr: 24, ad: 90, nextHop: "10.0.0.5", protocol: "EIGRP" },
 ];
 
-const EXAMPLES = ["10.10.5.20", "10.10.9.4", "10.55.1.1", "8.8.8.8"];
+// 10.10.8.x → two /24s tie, so administrative distance decides (EIGRP 90 beats OSPF 110)
+const EXAMPLES = ["10.10.5.20", "10.10.8.15", "10.10.9.4", "10.55.1.1", "8.8.8.8"];
 
 export default function RoutingDecision() {
   const [ip, setIp] = useState("10.10.5.20");
@@ -71,8 +74,12 @@ export default function RoutingDecision() {
             Of the <span className="text-text">{matches.length}</span> matching route{matches.length !== 1 && "s"}, the router picks{" "}
             <span className="font-mono font-bold" style={{ color: D2 }}>{winner.network}/{winner.cidr}</span> →
             next hop <span className="font-mono text-text">{winner.nextHop}</span>.{" "}
-            {matches.length > 1 && (
-              <>It wins by <span className="text-text">longest prefix match</span> (the most specific /{winner.cidr}){matches.filter((m) => m.cidr === winner.cidr).length > 1 ? <>, then by lowest <span className="text-text">administrative distance</span> ({winner.ad}).</> : "."}</>
+            {matches.length > 1 ? (
+              <>It wins by <span className="text-text">longest prefix match</span> (the most specific /{winner.cidr}){matches.filter((m) => m.cidr === winner.cidr).length > 1 ? <>, then — because two /{winner.cidr} routes tie — by lowest <span className="text-text">administrative distance</span> ({winner.ad}, {winner.protocol}, beating the higher-AD match).</> : "."}</>
+            ) : winner.cidr === 0 ? (
+              <>That&apos;s the <span className="text-text">default route</span> (<span className="text-text">gateway of last resort</span>) — chosen because no more-specific route matches.</>
+            ) : (
+              <>It&apos;s the only route that matches.</>
             )}
           </>
         ) : <span className="text-faint">Enter a valid IPv4 address.</span>}

@@ -75,6 +75,7 @@ export default function DrObjectivesPBQ() {
               style={{ borderColor: checked ? (m === correctMetric ? "var(--color-good)" : m === metric ? "var(--color-bad)" : "var(--color-line)") : metric === m ? D3 : "var(--color-line)", color: "var(--color-muted)" }}>{m}</button>
           ))}
         </div>
+        {checked && !metricOk && <span className="mt-1 block text-xs text-bad">correct: {correctMetric}</span>}
       </div>
 
       <div className="flex items-center justify-between gap-3">

@@ -37,7 +37,7 @@ export default function DnsRecordsPBQ() {
           return (
             <div key={i} className="flex flex-wrap items-center gap-2">
               <span className="flex-1 text-sm text-text">{r.text}</span>
-              <select value={picks[i] ?? ""} disabled={checked} onChange={(e) => setPicks((p) => ({ ...p, [i]: e.target.value }))}
+              <select value={picks[i] ?? ""} disabled={checked} aria-label={`Record type for: ${r.text}`} onChange={(e) => setPicks((p) => ({ ...p, [i]: e.target.value }))}
                 className="h-9 w-28 rounded-md border bg-surface-2 px-2 font-mono text-sm text-text"
                 style={{ borderColor: checked ? (ok ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }}>
                 <option value="">type…</option>

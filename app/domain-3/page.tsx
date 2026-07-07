@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { domainBySlug } from "@/lib/domains";
 import { DNS_RECORDS, DR_SITES, DR_METRICS } from "@/lib/domain3";
 import DomainHeader from "@/components/DomainHeader";
-import { Container, Section, SectionTitle, Callout, DemoFrame, Term } from "@/components/ui";
+import { Container, Section, SectionTitle, Callout, DemoFrame, Term, Mono } from "@/components/ui";
 import QuestionCard from "@/components/QuestionCard";
 import DoraAnimation from "@/components/domain3/DoraAnimation";
 import DnsResolution from "@/components/domain3/DnsResolution";
@@ -102,8 +102,9 @@ export default function Page() {
           <DemoFrame title="Syslog severity 0–7" accent={D3}><SyslogSeverity /></DemoFrame>
           <DemoFrame title="SNMP: polling vs traps" accent={D3}><SnmpPollTrap /></DemoFrame>
           <DefList items={[
+            ["SNMP internals (MIB / OID / versions)", <>A <Term>MIB</Term> is the device&apos;s database of stats; each value has an <Term>OID</Term> (a numbered object identifier path). <Mono>v1</Mono>/<Mono>v2c</Mono> authenticate with a plaintext <Term>community string</Term> (often <Mono>public</Mono>/<Mono>private</Mono>); <Mono>v3</Mono> adds usernames, authentication, and encryption — always prefer v3.</>],
             ["SIEM", <>Collects logs from everywhere, correlates them, and alerts on patterns (e.g. many failed logins across hosts).</>],
-            ["Flow data vs packet capture", <>Flow (NetFlow) summarizes <em>who talked to whom, how much</em>; a packet capture records the actual bytes for deep analysis.</>],
+            ["Flow data vs packet capture", <>Flow (NetFlow / sFlow / IPFIX) summarizes <em>who talked to whom, how much</em>; a packet capture records the actual bytes for deep analysis.</>],
             ["Port mirroring (SPAN)", <>Copies traffic from one switch port to another so a sniffer/IDS can watch it without being in-line.</>],
             ["Baselines & anomaly alerts", <>Record &ldquo;normal&rdquo; first; then alert when metrics drift from that baseline.</>],
           ]} />
@@ -118,8 +119,9 @@ export default function Page() {
         <Section id="obj-3-3">
           <SectionTitle objective="3.3" accent={D3}>Disaster recovery</SectionTitle>
           <P>DR planning is built on two numbers — how much data you can lose (<Term>RPO</Term>) and how long you can be down (<Term>RTO</Term>) — and the recovery site you pay for to hit them.</P>
-          <Analogy>RPO is how many pages of your diary you can afford to lose; RTO is how fast you must reopen the shop. And recovery sites are a spare car: <span className="text-text">hot</span> = idling in the driveway, <span className="text-text">warm</span> = parked in the garage, <span className="text-text">cold</span> = still at the dealership.</Analogy>
+          <Analogy>RPO is how many pages of your diary you can afford to lose since your last copy; RTO is how fast you must reopen the shop after it closes.</Analogy>
           <DemoFrame title="RPO vs RTO" accent={D3}><RtoRpoTimeline /></DemoFrame>
+          <Analogy>a recovery site is a spare car: <span className="text-text">hot</span> = idling in the driveway (drive off instantly), <span className="text-text">warm</span> = parked in the garage (needs fuel and a minute), <span className="text-text">cold</span> = still at the dealership (days to acquire).</Analogy>
           <div className="overflow-hidden rounded-lg border border-line-soft">
             <table className="w-full text-left text-sm">
               <thead className="bg-surface-2 text-xs text-faint"><tr><th className="px-3 py-2">Site</th><th className="px-3 py-2">Recovery</th><th className="px-3 py-2">Cost</th><th className="px-3 py-2">What it is</th></tr></thead>
@@ -139,6 +141,10 @@ export default function Page() {
           <Callout tone="info" title="Backup types">
             <span className="text-text">Full</span> = everything (slow, simple restore). <span className="text-text">Incremental</span> = only what changed since the last backup (fast backup, slower restore). <span className="text-text">Differential</span> = everything since the last full. The <span className="text-text">3-2-1 rule</span>: 3 copies, 2 media, 1 offsite.
           </Callout>
+          <DefList items={[
+            ["Active-passive vs active-active", <><Term>Active-passive</Term>: one device handles traffic while a synced standby waits to take over on failure. <Term>Active-active</Term>: both run and share the load — more capacity, but more complex to manage.</>],
+            ["Testing the plan", <>A <Term>tabletop exercise</Term> talks a simulated disaster through on paper; <Term>validation tests</Term> actually exercise the failover — ideally without touching production.</>],
+          ]} />
           <PbqBox title="Set the recovery objectives"><DrObjectivesPBQ /></PbqBox>
           <div className="flex flex-wrap gap-2">
             <Messer slug="disaster-recovery-n10-009">Disaster Recovery</Messer>
@@ -156,6 +162,7 @@ export default function Page() {
             ["Scope, pool, lease", <>The <Term>scope</Term> is the range a server hands out; the <Term>lease</Term> is how long a client keeps its address before renewing.</>],
             ["Reservation vs exclusion", <>A <Term>reservation</Term> ties an address to a device&apos;s MAC; an <Term>exclusion</Term> holds addresses back from the pool (for static gear).</>],
             ["Relay / IP helper", <>DHCP Discover is a broadcast routers don&apos;t forward — an <Term>IP helper</Term> on the router relays it to a DHCP server on another subnet.</>],
+            ["Lease renewal (T1 / T2)", <>A client renews at <Mono>T1</Mono> = 50% of the lease (to its own server); if that fails it broadcasts to <em>any</em> server at <Mono>T2</Mono> = 87.5%.</>],
           ]} />
           <DemoFrame title="DNS: how a name resolves" accent={D3}><DnsResolution /></DemoFrame>
           <div className="overflow-hidden rounded-lg border border-line-soft">
@@ -172,9 +179,18 @@ export default function Page() {
               </tbody>
             </table>
           </div>
-          <Callout tone="info" title="Also know">
-            <span className="text-text">Recursive</span> resolver (does the legwork for you) vs <span className="text-text">authoritative</span> server (holds the real answer). <span className="text-text">NTP</span> uses a stratum hierarchy to sync time — critical for logs, certs, and Kerberos. IPv6 hosts can self-assign via <span className="text-text">SLAAC</span>.
-          </Callout>
+          <P>Two more DNS things the exam tests — how a name resolves, and how DNS is secured:</P>
+          <DefList items={[
+            ["Recursive vs authoritative", <>A <Term>recursive resolver</Term> does the legwork (root → TLD → authoritative) and caches the answer; the <Term>authoritative</Term> server holds the real records (the demo above walks this). <Term>Forward</Term> lookup = name→IP; <Term>reverse</Term> = IP→name (PTR).</>],
+            ["Encrypted DNS: DoT / DoH", <><Term>DoT</Term> = DNS over TLS on <Mono>tcp/853</Mono>; <Term>DoH</Term> = DNS over HTTPS on <Mono>tcp/443</Mono> (looks like ordinary web traffic). Both hide the plaintext <Mono>udp/53</Mono> lookups.</>],
+            ["DNSSEC", <>Digitally signs DNS records so a forged or spoofed answer is detected — integrity, not encryption.</>],
+          ]} />
+          <P>And the services that keep time and auto-address IPv6:</P>
+          <DefList items={[
+            ["NTP & stratum", <><Term>NTP</Term> syncs clocks on <Mono>udp/123</Mono>. <Term>Stratum</Term> = distance from the reference clock: stratum 0 is the atomic/GPS source, 1 is directly attached, higher is further away. <Term>NTS</Term> adds authentication so the time source can be trusted. Accurate time is critical for logs, certificates, and Kerberos.</>],
+            ["PTP", <><Term>Precision Time Protocol</Term> (IEEE 1588) is hardware-based and sub-microsecond — for finance and industrial gear where NTP&apos;s milliseconds aren&apos;t precise enough.</>],
+            ["IPv6 autoconfig: SLAAC", <>IPv6 hosts self-assign with <Term>SLAAC</Term> using <Term>NDP</Term> (Router Solicitation/Advertisement) — no DHCP needed — then run <Term>DAD</Term> (Duplicate Address Detection) to confirm the address is unique.</>],
+          ]} />
           <div className="space-y-4">
             <PbqBox title="Size & fix the DHCP scope"><DhcpScopePBQ /></PbqBox>
             <PbqBox title="Pick the right DNS records"><DnsRecordsPBQ /></PbqBox>
@@ -195,7 +211,8 @@ export default function Page() {
           <DefList items={[
             ["In-band vs out-of-band", <>In-band manages over the normal network (SSH to its IP); out-of-band uses a separate path (console, dedicated mgmt port, cellular) that survives an outage.</>],
             ["VPN types", <><Term>Site-to-site</Term> links whole offices always-on; <Term>client-to-site</Term> (remote access) is for individual users; <Term>clientless</Term> runs in a browser over TLS.</>],
-            ["Secure vs insecure tools", <>Prefer <Term>SSH</Term> over Telnet, and use <Term>RDP</Term> for Windows GUIs. A <Term>jump box/bastion</Term> is the single audited entry point to a protected segment.</>],
+            ["Remote CLI & GUI tools", <>Prefer <Term>SSH</Term> (encrypted, <Mono>tcp/22</Mono>) over <Term>Telnet</Term> (cleartext, <Mono>23</Mono>) for a command line. For a remote desktop use <Term>RDP</Term> (Windows, <Mono>3389</Mono>) or <Term>VNC</Term> (cross-platform, the RFB protocol). A <Term>console</Term> (serial/USB) is the always-available last resort.</>],
+            ["Jump box & API management", <>A <Term>jump box / bastion</Term> is the single hardened, audited entry point into a protected segment. At scale, config is increasingly pushed through <Term>REST APIs</Term> instead of logging into each device by hand.</>],
           ]} />
           <PbqBox title="Choose the access method"><AccessMethodPBQ /></PbqBox>
           <div className="flex flex-wrap gap-2">

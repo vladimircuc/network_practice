@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { domainBySlug } from "@/lib/domains";
 import { ROUTING_PROTOCOLS, WIFI_STANDARDS, POE_STANDARDS } from "@/lib/domain2";
 import DomainHeader from "@/components/DomainHeader";
-import { Container, Section, SectionTitle, DemoFrame, Term, Mono } from "@/components/ui";
+import { Container, Section, SectionTitle, Callout, DemoFrame, Term, Mono } from "@/components/ui";
 import QuestionCard from "@/components/QuestionCard";
 import RoutingDecision from "@/components/domain2/RoutingDecision";
 import NatPat from "@/components/domain2/NatPat";
@@ -56,6 +56,19 @@ function Analogy({ children }: { children: ReactNode }) {
       style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, transparent)", backgroundColor: "color-mix(in oklab, var(--color-d2) 7%, transparent)" }}>
       <span aria-hidden>💡</span>
       <span><span className="font-semibold text-text">Think of it like:</span> {children}</span>
+    </div>
+  );
+}
+/** A labelled sub-section with a one-line "why it matters" — used to break a dense objective into digestible blocks. */
+function Block({ label, title, why, children }: { label: string; title: string; why: ReactNode; children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-line-soft bg-surface/30 p-4 sm:p-5">
+      <div className="mb-1.5 flex items-center gap-2">
+        <span className="rounded-md px-2 py-0.5 font-mono text-[11px] font-bold uppercase tracking-wider" style={{ color: D2, backgroundColor: "color-mix(in oklab, var(--color-d2) 14%, transparent)" }}>{label}</span>
+        <h3 className="text-base font-semibold text-text">{title}</h3>
+      </div>
+      <p className="text-sm leading-relaxed text-muted"><span className="font-medium text-text">Why it matters:</span> {why}</p>
+      {children}
     </div>
   );
 }
@@ -114,8 +127,8 @@ export default function Page() {
 
           <P>Two more 2.1 staples — address translation and gateway redundancy — plus bandwidth control:</P>
           <DefList items={[
-            ["NAT / PAT", <>NAT swaps private addresses for public ones at the edge. <Term>PAT</Term> (what home routers do) maps many private hosts to one public IP using port numbers.</>],
-            ["FHRP (VRRP / HSRP)", <>Two routers share one <Term>virtual IP</Term> as the gateway; if the active one dies, the standby takes over instantly — no client reconfiguration. Like two backup generators on one outlet: the standby kicks in and nobody notices.</>],
+            ["NAT types (static / dynamic / PAT)", <><Term>Static NAT</Term> = a permanent 1:1 private↔public mapping (to reach an internal server from outside). <Term>Dynamic NAT</Term> = a pool of public IPs handed out as needed. <Term>PAT</Term> (NAT overload — what home routers do) = many private hosts share <em>one</em> public IP, kept apart by port numbers.</>],
+            ["FHRP (VRRP / HSRP / GLBP)", <>Routers share one <Term>virtual IP</Term> as the gateway; if the active one dies, a standby takes over instantly — no client change. <Mono>VRRP</Mono> is the open standard; <Mono>HSRP</Mono>/<Mono>GLBP</Mono> are Cisco. Like two backup generators on one outlet: the standby kicks in and nobody notices.</>],
             ["Subinterfaces", <>One physical router port split into logical interfaces (one per VLAN) — &ldquo;router-on-a-stick&rdquo; inter-VLAN routing.</>],
             ["QoS & traffic shaping", <>Mark and prioritize traffic (voice/video over bulk downloads) and cap rates so latency-sensitive apps stay smooth.</>],
           ]} />
@@ -141,71 +154,109 @@ export default function Page() {
         <Section id="obj-2-2">
           <SectionTitle objective="2.2" accent={D2}>Switching technologies</SectionTitle>
           <P>
-            Switches move frames <span className="text-text">within</span> a network. <Term>VLANs</Term> let one physical
-            switch host several isolated networks (separate broadcast domains). An <Term>access port</Term> belongs to one
-            VLAN; a <Term>trunk</Term> carries many between switches using <Mono>802.1Q</Mono> tags.
+            Switches move frames <span className="text-text">within</span> a network. This objective is big, so take it in three
+            blocks: carve one switch into separate networks (<span className="text-text">VLANs</span>), keep those networks
+            loop-free (<span className="text-text">Spanning Tree</span>), then tune the physical ports
+            (<span className="text-text">speed/duplex, MTU, LACP, PoE</span>).
           </P>
-          <Analogy>
-            one office building split into departments with keycard doors. Same building (one switch), but HR
-            can&apos;t wander into Finance without going through a controlled route (a router). A <Term>trunk</Term> is the
-            elevator that carries people from every floor at once — each with a tag saying which floor they belong to.
-          </Analogy>
-          <DemoFrame title="VLANs, trunks & who can talk to whom" accent={D2}><VlanTrunkLab /></DemoFrame>
-          <DefList items={[
-            ["Native VLAN", <>The one untagged VLAN on a trunk — it must match on both ends or frames cross into the wrong VLAN.</>],
-            ["Voice VLAN", <>A dedicated VLAN for IP phones so voice traffic is separated and prioritized.</>],
-            ["Link aggregation (LACP)", <>Bundle several physical links into one logical link for more bandwidth and redundancy.</>],
-            ["Speed / duplex", <>Mismatched duplex (one full, one half) causes collisions, CRC errors, and crawling throughput — a classic fault.</>],
-          ]} />
 
-          <P>
-            <Term>Spanning Tree (STP/RSTP)</Term> prevents switching loops by electing a <Term>root bridge</Term> (lowest
-            bridge ID = priority, then MAC) and blocking redundant links until needed.
-          </P>
-          <Analogy>
-            a road grid with backup roads. To stop cars from looping forever, the network picks one main hub (the
-            root) and temporarily closes a redundant road (blocks a port) — keeping it on standby to reopen the moment
-            a main road fails.
-          </Analogy>
-          <DemoFrame title="Elect the root bridge" accent={D2}><StpVisualizer /></DemoFrame>
-          <DefList items={[
-            ["Port states", <>Blocking → Listening → Learning → Forwarding (RSTP collapses these for faster convergence).</>],
-            ["BPDU Guard / Root Guard", <>BPDU Guard err-disables an edge port that receives BPDUs (rogue switch); Root Guard stops a port from becoming root.</>],
-            ["PortFast", <>Skips the listening/learning delay on access ports so devices come online immediately.</>],
-            ["MTU / jumbo frames", <>Default MTU is 1500 bytes; jumbo frames (~9000) boost storage/backup throughput but must be enabled end-to-end.</>],
-          ]} />
+          <div className="space-y-5">
+            {/* Block A — VLANs */}
+            <Block label="A" title="VLANs & trunking" why={<>VLANs split one physical switch into several isolated networks (separate broadcast domains) — the foundation for keeping departments, voice, and guests apart.</>}>
+              <Analogy>
+                one office building split into departments with keycard doors. Same building (one switch), but HR can&apos;t
+                wander into Finance without going through a controlled route (a router). A <Term>trunk</Term> is the elevator
+                that carries people from every floor at once — each tagged with the floor they belong to.
+              </Analogy>
+              <DemoFrame title="VLANs, trunks & who can talk to whom" accent={D2}><VlanTrunkLab /></DemoFrame>
+              <DefList items={[
+                ["Access port vs trunk port", <>An <Term>access port</Term> carries exactly one VLAN to an endpoint. A <Term>trunk</Term> carries many VLANs between switches, tagging each frame with <Mono>802.1Q</Mono>.</>],
+                ["VLAN IDs", <>The 802.1Q tag is 12 bits → <Mono>1–4094</Mono> usable (0 and 4095 are reserved). Every port starts in the default <Mono>VLAN 1</Mono>.</>],
+                ["Native VLAN (exam favorite)", <>The one <em>untagged</em> VLAN on a trunk. It must match on both ends — if one side is native 1 and the other native 99, untagged frames land in the wrong VLAN: a connectivity bug and a <Term>VLAN-hopping</Term> security risk.</>],
+                ["Voice VLAN", <>A phone port can carry two VLANs at once — an untagged <Term>data</Term> VLAN for a daisy-chained PC plus a tagged <Term>voice</Term> VLAN — so voice is separated and prioritized.</>],
+              ]} />
+              <Callout tone="exam" title="Inter-VLAN routing — why a switch alone isn't enough">
+                VLANs are <em>separate broadcast domains</em>, so VLAN 10 can&apos;t reach VLAN 20 by switching — it needs a
+                Layer 3 hop. Either <Term>router-on-a-stick</Term> (one trunk to a router, a <Mono>subinterface</Mono> per VLAN)
+                or a <Term>Layer 3 switch</Term> using a <Term>switched virtual interface (SVI)</Term> — a virtual gateway IP for
+                each VLAN, configured inside the switch itself.
+              </Callout>
+              <div className="rounded-xl border p-4" style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, var(--color-line))" }}>
+                <div className="mb-2 flex items-center gap-2"><PbqBadge /><span className="font-semibold text-text">Configure the switchports + fix inter-VLAN</span></div>
+                <VlanPBQ />
+              </div>
+            </Block>
 
-          <P><Term>Power over Ethernet</Term> delivers power and data over one cable — but the switch has a finite power budget:</P>
-          <div className="overflow-hidden rounded-lg border border-line-soft">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-surface-2 text-xs text-faint"><tr><th className="px-3 py-2">Standard</th><th className="px-3 py-2">Name</th><th className="px-3 py-2">Type</th><th className="px-3 py-2">At the switch</th></tr></thead>
-              <tbody>
-                {POE_STANDARDS.map((p) => (
-                  <tr key={p.name} className="border-t border-line-soft">
-                    <td className="px-3 py-2 font-mono font-semibold text-text">{p.std}</td>
-                    <td className="px-3 py-2 text-muted">{p.name}</td>
-                    <td className="px-3 py-2 text-muted">{p.type}</td>
-                    <td className="px-3 py-2 font-mono" style={{ color: D2 }}>{p.switchW} W</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <DemoFrame title="Stay under the PoE budget" accent={D2}><PoeBudget /></DemoFrame>
+            {/* Block B — STP */}
+            <Block label="B" title="Spanning Tree (STP / RSTP)" why={<>Two switches cabled in a loop flood frames forever — there&apos;s no TTL at Layer 2. STP blocks redundant links so a loop can&apos;t form, then re-opens them if a link fails.</>}>
+              <Analogy>
+                a road grid with backup roads. To stop cars looping forever, the network elects one main hub (the <Term>root
+                bridge</Term>) and temporarily closes a redundant road (blocks a port) — held on standby to reopen the moment a
+                main road fails.
+              </Analogy>
+              <DemoFrame title="Elect the root bridge" accent={D2}><StpVisualizer /></DemoFrame>
+              <P>
+                The <Term>root bridge</Term> is the switch with the lowest <Term>bridge ID</Term> — priority first (default
+                <Mono>32768</Mono>), then lowest MAC as the tie-breaker. On any redundant link, the switch with the
+                <em> worse</em> bridge ID loses and puts its end into <Mono>Blocking</Mono> — that&apos;s the port the demo marks
+                with ✕.
+              </P>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg border border-line-soft bg-surface/40 p-3 text-sm">
+                  <div className="mb-1 font-semibold text-text">Port states <span className="font-normal text-faint">— what it&apos;s doing</span></div>
+                  <p className="leading-relaxed text-muted">Blocking → Listening → Learning → Forwarding. RSTP (802.1w) collapses these to Discarding / Learning / Forwarding for ~sub-second convergence vs classic STP&apos;s ~30–50 s.</p>
+                </div>
+                <div className="rounded-lg border border-line-soft bg-surface/40 p-3 text-sm">
+                  <div className="mb-1 font-semibold text-text">Port roles <span className="font-normal text-faint">— its job in the tree</span></div>
+                  <p className="leading-relaxed text-muted"><Term>Root port</Term> = best path toward the root. <Term>Designated port</Term> = the forwarding port on a segment. <Term>Blocked/alternate</Term> = the backup held down to break the loop.</p>
+                </div>
+              </div>
+              <P>Three edge-port features everyone mixes up — keep them straight:</P>
+              <div className="overflow-hidden rounded-lg border border-line-soft">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-surface-2 text-xs text-faint"><tr><th className="px-3 py-2">Feature</th><th className="px-3 py-2">What it does</th><th className="px-3 py-2">Use on</th></tr></thead>
+                  <tbody>
+                    <tr className="border-t border-line-soft"><td className="px-3 py-2 font-semibold text-text">PortFast</td><td className="px-3 py-2 text-muted">Skips listening/learning so the port forwards instantly</td><td className="px-3 py-2 text-muted">Access ports (PCs, phones)</td></tr>
+                    <tr className="border-t border-line-soft"><td className="px-3 py-2 font-semibold text-text">BPDU Guard</td><td className="px-3 py-2 text-muted">Err-disables a PortFast port the instant it receives a BPDU (rogue switch)</td><td className="px-3 py-2 text-muted">Access ports</td></tr>
+                    <tr className="border-t border-line-soft"><td className="px-3 py-2 font-semibold text-text">Root Guard</td><td className="px-3 py-2 text-muted">Blocks a port if a downstream switch tries to become root</td><td className="px-3 py-2 text-muted">Ports toward other switches</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="rounded-xl border p-4" style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, var(--color-line))" }}>
+                <div className="mb-2 flex items-center gap-2"><PbqBadge /><span className="font-semibold text-text">Find the root bridge &amp; the blocked port</span></div>
+                <StpElectionPBQ />
+              </div>
+            </Block>
 
-          <div className="space-y-4">
-            <div className="rounded-xl border p-4" style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, var(--color-line))" }}>
-              <div className="mb-2 flex items-center gap-2"><PbqBadge /><span className="font-semibold text-text">Configure the switchports + fix inter-VLAN</span></div>
-              <VlanPBQ />
-            </div>
-            <div className="rounded-xl border p-4" style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, var(--color-line))" }}>
-              <div className="mb-2 flex items-center gap-2"><PbqBadge /><span className="font-semibold text-text">Find the root bridge &amp; the blocked port</span></div>
-              <StpElectionPBQ />
-            </div>
-            <div className="rounded-xl border p-4" style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, var(--color-line))" }}>
-              <div className="mb-2 flex items-center gap-2"><PbqBadge /><span className="font-semibold text-text">Will the PoE budget hold?</span></div>
-              <PoeBudgetPBQ />
-            </div>
+            {/* Block C — Interfaces & Power */}
+            <Block label="C" title="Interface settings & PoE" why={<>With VLANs and STP correct, most remaining switch faults are physical-port settings: a duplex mismatch, an MTU mismatch, or an over-budget PoE switch.</>}>
+              <DefList items={[
+                ["Speed & duplex", <>Negotiated to <Mono>10 / 100 / 1000 / 10G</Mono> and half/full. Both ends must agree — a <Term>duplex mismatch</Term> (one full, one half, usually one side hard-set against an auto peer) causes late collisions, CRC errors, and crawling throughput. Set both ends the same (ideally both auto).</>],
+                ["Link aggregation (LACP)", <>Bundle several physical links into one logical link for more bandwidth and redundancy if one fails.</>],
+                ["MTU / jumbo frames", <>Default MTU is <Mono>1500</Mono> bytes; <Term>jumbo frames</Term> (~9000) boost storage/backup throughput but must be enabled end-to-end — one 1500-byte hop in the path breaks large transfers.</>],
+              ]} />
+              <P><Term>Power over Ethernet</Term> delivers power and data over one cable — but the switch has a finite power budget the connected devices must stay under:</P>
+              <div className="overflow-hidden rounded-lg border border-line-soft">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-surface-2 text-xs text-faint"><tr><th className="px-3 py-2">Standard</th><th className="px-3 py-2">Name</th><th className="px-3 py-2">Type</th><th className="px-3 py-2">At the switch</th></tr></thead>
+                  <tbody>
+                    {POE_STANDARDS.map((p) => (
+                      <tr key={p.name} className="border-t border-line-soft">
+                        <td className="px-3 py-2 font-mono font-semibold text-text">{p.std}</td>
+                        <td className="px-3 py-2 text-muted">{p.name}</td>
+                        <td className="px-3 py-2 text-muted">{p.type}</td>
+                        <td className="px-3 py-2 font-mono" style={{ color: D2 }}>{p.switchW} W</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <DemoFrame title="Stay under the PoE budget" accent={D2}><PoeBudget /></DemoFrame>
+              <div className="rounded-xl border p-4" style={{ borderColor: "color-mix(in oklab, var(--color-d2) 30%, var(--color-line))" }}>
+                <div className="mb-2 flex items-center gap-2"><PbqBadge /><span className="font-semibold text-text">Will the PoE budget hold?</span></div>
+                <PoeBudgetPBQ />
+              </div>
+            </Block>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -220,8 +271,9 @@ export default function Page() {
           <SectionTitle objective="2.3" accent={D2}>Wireless</SectionTitle>
           <P>
             Wi-Fi runs on <Term>2.4 GHz</Term> (farther reach, more interference, slower),
-            <Term> 5 GHz</Term> (faster, shorter range), and <Term>6 GHz</Term> (Wi-Fi 6E, lots of clean spectrum). Know the
-            standards:
+            <Term> 5 GHz</Term> (faster, shorter range), and <Term>6 GHz</Term> (opened by Wi-Fi 6E, also used by Wi-Fi 7 —
+            lots of clean spectrum). The generation map is the exam shortcut: <Mono>n</Mono> = Wi-Fi 4, <Mono>ac</Mono> = Wi-Fi 5,
+            <Mono>ax</Mono> = Wi-Fi 6/6E, <Mono>be</Mono> = Wi-Fi 7. Know the standards:
           </P>
           <div className="overflow-hidden rounded-lg border border-line-soft">
             <table className="w-full text-left text-sm">
@@ -247,8 +299,10 @@ export default function Page() {
           <DemoFrame title="2.4 GHz channel overlap" accent={D2}><ChannelOverlapChart /></DemoFrame>
           <DefList items={[
             ["SSID / BSSID / ESSID", <>SSID = the network name; BSSID = a specific AP&apos;s radio MAC; ESSID = the same SSID shared across many APs for seamless roaming.</>],
-            ["Security: WPA2 vs WPA3", <>WPA3 is current (SAE handshake, stronger crypto). <Term>PSK</Term> = one shared password (home); <Term>Enterprise</Term> = per-user logins via 802.1X/RADIUS.</>],
-            ["AP types", <>Autonomous APs are configured one-by-one; <Term>lightweight</Term> APs are managed centrally by a <Term>WLC</Term> (wireless LAN controller).</>],
+            ["Channel width", <><Mono>20 / 40 / 80 / 160 MHz</Mono> — wider channels carry more speed but leave fewer non-overlapping options and pick up more interference. 2.4 GHz realistically sticks to 20 MHz.</>],
+            ["Band steering", <>Nudges dual-band clients onto the less-congested band (usually 5 or 6 GHz) instead of camping on crowded 2.4 GHz.</>],
+            ["Security: WPA2 vs WPA3", <>WPA2 encrypts with <Term>AES-CCMP</Term>; WPA3 uses <Term>AES-GCMP</Term> plus the <Term>SAE</Term> handshake (kills WPA2&apos;s offline password guessing). <Term>PSK</Term> = one shared password (home); <Term>Enterprise</Term> = per-user logins via 802.1X/RADIUS.</>],
+            ["AP types", <>Autonomous APs are configured one-by-one; <Term>lightweight</Term> APs are managed centrally by a <Term>WLC</Term> (wireless LAN controller) over <Mono>CAPWAP</Mono>.</>],
             ["Antennas", <>Omnidirectional spreads signal all around; directional (Yagi, parabolic) focuses it for point-to-point links.</>],
             ["Survey & placement", <>A site survey / heat map finds dead spots and interference before you mount APs.</>],
           ]} />
@@ -273,8 +327,9 @@ export default function Page() {
           </P>
           <DemoFrame title="Inside the rack" accent={D2}><RackDiagram /></DemoFrame>
           <DefList items={[
-            ["Power: UPS vs PDU vs generator", <>A <Term>UPS</Term> is battery backup for short outages + surge protection; a <Term>PDU</Term> distributes power to each device; a generator covers long outages. Watch total power load and voltage.</>],
-            ["Environmental", <>Control temperature and <Term>humidity</Term> (too dry = static, too humid = condensation), and plan <Term>fire suppression</Term> (clean agent, not water, over electronics).</>],
+            ["Racks & rack units", <>Gear is <Mono>19″</Mono> wide and measured in <Term>rack units</Term> — <Mono>1U = 1.75″</Mono>, a full rack commonly <Mono>42U</Mono>. Plan U-height and depth before buying.</>],
+            ["Power: UPS / PDU / generator", <>A <Term>UPS</Term> is battery backup for short outages + surge/sag protection (offline, line-interactive, or online/double-conversion); a <Term>PDU</Term> distributes power to each device in the rack; a <Term>generator</Term> covers long outages. Load math: <Mono>watts = volts × amps</Mono>, and supplies convert AC → DC.</>],
+            ["Environmental ranges", <>Keep the room ~<Mono>64–81°F</Mono> (18–27°C) and <Mono>40–60%</Mono> humidity — too dry invites static discharge, too humid invites condensation/corrosion. Use clean-agent <Term>fire suppression</Term> (not water) over electronics.</>],
             ["Airflow", <>Align hot/cold aisles and respect port-side exhaust/intake so equipment doesn&apos;t overheat.</>],
             ["Cabling & security", <>Patch panels and fiber distribution panels keep runs tidy; lockable racks/rooms keep gear physically secure.</>],
           ]} />

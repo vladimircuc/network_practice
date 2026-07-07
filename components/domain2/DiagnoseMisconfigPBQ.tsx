@@ -55,8 +55,9 @@ const FIRST: Q = {
   idx: 0,
   options: ["Incorrect DNS server", "Exhausted DHCP scope", "Duplex mismatch — one side full, the other negotiated half", "VLAN assignment error"],
 };
-function gen(): Q {
-  const idx = Math.floor(Math.random() * SCENARIOS.length);
+function gen(prev?: number): Q {
+  let idx = Math.floor(Math.random() * SCENARIOS.length);
+  while (SCENARIOS.length > 1 && idx === prev) idx = Math.floor(Math.random() * SCENARIOS.length);
   const s = SCENARIOS[idx];
   return { idx, options: shuffle([s.correct, ...s.distractors]) };
 }
@@ -73,7 +74,7 @@ export default function DiagnoseMisconfigPBQ() {
     setPicked(opt);
     setScore((x) => ({ right: x.right + (opt === s.correct ? 1 : 0), total: x.total + 1 }));
   }
-  function next() { setQ(gen()); setPicked(null); }
+  function next() { setQ((cur) => gen(cur.idx)); setPicked(null); }
 
   return (
     <div>

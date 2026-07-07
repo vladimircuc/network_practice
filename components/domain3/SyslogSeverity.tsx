@@ -46,6 +46,9 @@ export default function SyslogSeverity() {
         </div>
       </div>
 
+      <div className="mt-3 rounded-lg border border-line-soft bg-surface-2/60 px-3 py-2 text-xs leading-relaxed text-muted">
+        <span className="font-semibold text-text">Deciding fast:</span> <span className="text-text">0–2</span> = already down or about to be (panic, no failover, dead hardware). <span className="text-text">3</span> = something <em>broke</em> (a link/process failed). <span className="text-text">4</span> = <em>heading toward</em> broken (high CPU, disk filling). <span className="text-text">5</span> = a normal state change worth logging (link up, config saved). <span className="text-text">6–7</span> = routine info &amp; debug noise.
+      </div>
       <p className="mt-3 text-center text-xs text-faint">Mnemonic (0→7): <span className="text-muted">{SYSLOG_MNEMONIC}</span></p>
     </div>
   );

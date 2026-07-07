@@ -47,6 +47,7 @@ export default function RoutingTablePBQ() {
 
   const answers = sc.dests.map((d) => selectRoute(sc.table, d)?.nextHop ?? "—");
   const score = answers.filter((a, i) => picks[i] === a).length;
+  const allAnswered = sc.dests.every((_, i) => picks[i]);
 
   function regen() {
     setSc(gen());
@@ -91,6 +92,7 @@ export default function RoutingTablePBQ() {
               <select
                 value={picks[i] ?? ""}
                 disabled={checked}
+                aria-label={`Next hop for ${d}`}
                 onChange={(e) => setPicks((p) => ({ ...p, [i]: e.target.value }))}
                 className="h-9 rounded-md border bg-surface-2 px-2 font-mono text-sm text-text"
                 style={{ borderColor: checked ? (ok ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }}
@@ -105,18 +107,16 @@ export default function RoutingTablePBQ() {
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        {checked ? <span className="text-sm font-semibold" style={{ color: score === sc.dests.length ? "var(--color-good)" : "var(--color-text)" }}>{score} / {sc.dests.length} correct</span> : <span />}
-        <button type="button" onClick={() => (checked ? regen() : setChecked(true))}
-          className="rounded-lg px-5 py-2 text-sm font-semibold text-white" style={{ backgroundColor: checked ? "var(--color-surface-3)" : D2 }}>
+        {checked ? <span className="text-sm font-semibold" style={{ color: score === sc.dests.length ? "var(--color-good)" : "var(--color-text)" }}>{score} / {sc.dests.length} correct</span> : <span className="text-xs text-faint">{allAnswered ? "" : "Answer every row to check."}</span>}
+        <button type="button" disabled={!checked && !allAnswered} onClick={() => (checked ? regen() : setChecked(true))}
+          className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-40" style={{ backgroundColor: checked ? "var(--color-surface-3)" : D2 }}>
           {checked ? "New table →" : "Check"}
         </button>
       </div>
 
       {checked && (
         <div className="mt-3 rounded-lg border border-line-soft bg-surface-2/60 p-3 text-xs leading-relaxed text-muted">
-          <span className="font-semibold text-accent">Why:</span> the tie pair (R4 vs R5, same /24) resolves to{" "}
-          <span className="text-text">R5</span> because EIGRP&apos;s AD (90) beats OSPF&apos;s (110). The most-specific
-          /24 always beats the /16 and /8 that also match.
+          <span className="font-semibold text-accent">Why:</span> take each destination by <span className="text-text">longest prefix first, then AD</span>. A matching <span className="text-text">/24</span> always beats the /16 and /8 that also match. When two /24s tie (R4 vs R5), the lower AD wins — <span className="text-text">EIGRP 90 beats OSPF 110 → R5</span>. If only the /16 matches it&apos;s R2; only the /8, R1.
         </div>
       )}
     </div>

@@ -47,7 +47,7 @@ function shuffle<T>(x: T[]): T[] { const r = x.slice(); for (let i = r.length - 
 
 type Q = { idx: number; options: string[] };
 const FIRST: Q = { idx: 0, options: ["In-band SSH to its production IP", "Out-of-band management (console / dedicated mgmt port)", "A full-tunnel VPN", "RDP to the switch"] };
-function gen(): Q { const idx = Math.floor(Math.random() * SCENARIOS.length); const s = SCENARIOS[idx]; return { idx, options: shuffle([s.correct, ...s.distractors]) }; }
+function gen(prev?: number): Q { let idx = Math.floor(Math.random() * SCENARIOS.length); while (SCENARIOS.length > 1 && idx === prev) idx = Math.floor(Math.random() * SCENARIOS.length); const s = SCENARIOS[idx]; return { idx, options: shuffle([s.correct, ...s.distractors]) }; }
 
 export default function AccessMethodPBQ() {
   const [q, setQ] = useState<Q>(FIRST);
@@ -56,7 +56,7 @@ export default function AccessMethodPBQ() {
 
   const s = SCENARIOS[q.idx];
   function pick(o: string) { if (picked) return; setPicked(o); setScore((x) => ({ right: x.right + (o === s.correct ? 1 : 0), total: x.total + 1 })); }
-  function next() { setQ(gen()); setPicked(null); }
+  function next() { setQ((cur) => gen(cur.idx)); setPicked(null); }
 
   return (
     <div>

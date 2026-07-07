@@ -46,7 +46,7 @@ export default function VlanPBQ() {
             <div key={p.id} className="flex flex-wrap items-center gap-2">
               <span className="w-12 shrink-0 font-mono text-sm font-bold text-text">{p.id}</span>
               <span className="flex-1 text-sm text-muted">{p.role}</span>
-              <select value={picks[p.id] ?? ""} disabled={checked} onChange={(e) => setPicks((x) => ({ ...x, [p.id]: e.target.value }))}
+              <select value={picks[p.id] ?? ""} disabled={checked} aria-label={`VLAN for ${p.id} — ${p.role}`} onChange={(e) => setPicks((x) => ({ ...x, [p.id]: e.target.value }))}
                 className="h-9 rounded-md border bg-surface-2 px-2 text-sm text-text"
                 style={{ borderColor: checked ? (ok ? "var(--color-good)" : "var(--color-bad)") : "var(--color-line)" }}>
                 <option value="">configure…</option>
@@ -60,7 +60,7 @@ export default function VlanPBQ() {
 
       <p className="mb-2 mt-5 text-sm text-muted">
         <span className="text-text">Part 2 —</span> Everything above is correct and the trunk is up, but the Finance PC
-        (VLAN 20) still can&apos;t reach the file server (VLAN 10). What&apos;s required?
+        (VLAN 20) still can&apos;t reach the Reception PC (VLAN 10). What&apos;s required?
       </p>
       <div className="space-y-1.5">
         {MC.map((opt, i) => {
@@ -88,10 +88,18 @@ export default function VlanPBQ() {
       </div>
 
       {checked && (
-        <div className="mt-3 rounded-lg border border-line-soft bg-surface-2/60 p-3 text-xs leading-relaxed text-muted">
-          <span className="font-semibold text-accent">Why:</span> VLANs are separate broadcast domains. A trunk carries
-          them between switches, but it does <span className="text-text">not</span> route between them — you need a router or
-          Layer 3 switch (router-on-a-stick or an SVI per VLAN) for VLAN 20 to reach VLAN 10.
+        <div className="mt-3 space-y-2 rounded-lg border border-line-soft bg-surface-2/60 p-3 text-xs leading-relaxed text-muted">
+          <div>
+            <span className="font-semibold text-accent">Why:</span> VLANs are separate broadcast domains. A trunk carries
+            them between switches, but it does <span className="text-text">not</span> route between them — you need a router or
+            Layer 3 switch (router-on-a-stick or an SVI per VLAN) for VLAN 20 to reach VLAN 10.
+          </div>
+          <div>
+            <span className="font-semibold text-accent">On Gi0/3:</span> a standalone lobby phone can sit in a single voice
+            VLAN as shown. But a phone port that <span className="text-text">also</span> feeds a daisy-chained PC carries two
+            VLANs at once — an <span className="text-text">untagged data VLAN</span> plus a <span className="text-text">tagged
+            802.1Q voice VLAN</span> — so it is not a plain access port.
+          </div>
         </div>
       )}
     </div>
