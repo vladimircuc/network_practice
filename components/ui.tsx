@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import ObjectiveTag from "./ObjectiveTag";
+import { lookupTerm } from "@/lib/glossary";
 
 /** Outer width container for page content. */
 export function Container({
@@ -140,11 +141,38 @@ export function DemoFrame({
   );
 }
 
-/** Inline highlighted key term. */
-export function Term({ children }: { children: ReactNode }) {
+/**
+ * Inline key term. If the term (or an explicit `def`) is in the glossary, it
+ * shows a hover/focus tooltip with what it stands for + a plain definition.
+ * Unknown terms just render with the dotted underline (graceful fallback).
+ */
+export function Term({
+  children,
+  def,
+  full,
+}: {
+  children: ReactNode;
+  /** override the glossary with an inline definition */
+  def?: string;
+  /** override the glossary with an inline acronym expansion */
+  full?: string;
+}) {
+  const entry = def ? { full, def } : lookupTerm(children);
+  const underline =
+    "font-medium text-text underline decoration-dotted decoration-faint underline-offset-4";
+
+  if (!entry) return <span className={underline}>{children}</span>;
+
   return (
-    <span className="font-medium text-text underline decoration-dotted decoration-faint underline-offset-4">
+    <span tabIndex={0} className={`group/term relative cursor-help focus:outline-none ${underline}`}>
       {children}
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-max max-w-[240px] -translate-x-1/2 rounded-lg border border-line bg-surface-3 px-3 py-2 text-left text-xs font-normal normal-case leading-relaxed no-underline opacity-0 shadow-xl transition-opacity duration-150 group-hover/term:opacity-100 group-focus/term:opacity-100"
+      >
+        {entry.full && <span className="mb-0.5 block font-semibold text-accent-2">{entry.full}</span>}
+        <span className="block text-muted">{entry.def}</span>
+      </span>
     </span>
   );
 }

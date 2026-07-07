@@ -75,19 +75,52 @@ export default function Page() {
           ))}
         </div>
 
-        {/* 3.1 DOCS (clean - lighter) */}
+        {/* 3.1 DOCS */}
         <Section id="obj-3-1">
           <SectionTitle objective="3.1" accent={D3} kicker="Network Operations">Processes &amp; documentation</SectionTitle>
-          <Callout tone="tip" title="You already nailed this one">
-            3.1 was one of your two clean objectives — so here&apos;s a tight refresher rather than a deep dive.
+          <P>
+            Operations is the unglamorous half of networking: keeping an accurate written record of what exists, and
+            following a disciplined process whenever something changes. The rule of thumb — <span className="text-text">you
+            can&apos;t run, hand off, or fix a network you haven&apos;t documented.</span>
+          </P>
+          <Callout tone="tip" title="You aced this on the exam — here it is in full anyway">
+            3.1 was one of your two clean objectives, so treat this as confirmation, not new material. It&apos;s still worth a
+            slow read: the vocabulary here — <span className="text-text">baselines, EOL/EOS, change control</span> — comes
+            back in Security and Troubleshooting.
           </Callout>
+
+          <P><span className="font-semibold text-text">The documents.</span> A network is only as maintainable as its paperwork. The core artifacts:</P>
           <DefList items={[
-            ["Physical vs logical diagrams", <>A <Term>physical</Term> diagram shows the actual cabling, racks, and ports; a <Term>logical</Term> one shows IP subnets, VLANs, and traffic flow.</>],
-            ["IPAM & asset inventory", <>IP Address Management tracks which addresses are used where; an asset inventory tracks the devices themselves (model, serial, location, lifecycle).</>],
-            ["Change & configuration management", <>Changes go through review/approval (so nothing breaks silently); configuration management keeps known-good <Term>baselines</Term> and backups you can roll back to.</>],
-            ["Life-cycle: EOL / EOS", <>End-of-Life = no more sales; End-of-Support = no more patches — a security risk you must plan to replace.</>],
-            ["Policies", <>AUP (acceptable use), BYOD, password, and SLAs set the rules and the expected service levels.</>],
+            ["Physical vs logical diagrams", <>A <Term>physical</Term> diagram shows the real cabling, racks, ports, and where devices sit — the literal wiring. A <Term>logical</Term> diagram shows IP subnets, VLANs, and how traffic flows, regardless of where the cables run. You want both: physical to trace a bad cable, logical to reason about routing.</>],
+            ["Rack diagrams", <>A front/back picture of each rack showing what occupies every <Term>rack unit</Term> — so someone can install or swap gear without physically walking the data center.</>],
+            ["Cable maps & labeling", <>Every drop and patch numbered and mapped (a Layer-1 record). It saves hours when a port dies or a run needs tracing.</>],
+            ["Asset inventory & database", <>A record of every device — make, model, serial, location, assigned user, warranty, and software license — used for support tickets, audits, and lifecycle planning.</>],
+            ["IPAM", <><Term>IPAM</Term> software plans and tracks which addresses are in use, maps IP-to-user over time, and manages DHCP scopes and reservations from one console.</>],
+            ["Wireless survey / heat map", <>A <Term>site survey</Term> samples the existing wireless spectrum; a <Term>heat map</Term> pictures signal strength across a space — both used to find dead spots and interference before (and after) mounting APs.</>],
           ]} />
+
+          <P><span className="font-semibold text-text">Change &amp; configuration management.</span> How you change things without breaking them, and how you keep configs consistent:</P>
+          <Analogy>change management is a construction permit: you propose the work, get it approved, schedule it for a low-impact window, and keep a documented way to undo it if something goes wrong.</Analogy>
+          <DefList items={[
+            ["Change management", <>A formal process: propose → review/approve → schedule → implement with a rollback plan → document. It exists because an unplanned change is one of the most common causes of an outage nobody can explain.</>],
+            ["Production vs backup config", <>The <Term>production config</Term> is what&apos;s running right now. Always save a <Term>backup config</Term> before a change so you can revert in seconds if it goes wrong.</>],
+            ["Baseline / golden config", <>A <Term>golden config</Term> is the known-good reference every similar device should match (firewall rules, patch level, OS versions). <Term>Configuration monitoring</Term> (integrity checking / drift detection) alerts you when a device drifts from that baseline.</>],
+          ]} />
+
+          <P><span className="font-semibold text-text">Life-cycle management.</span> Hardware and software don&apos;t last forever:</P>
+          <DefList items={[
+            ["EOL vs EOS (know the difference)", <><Term>EOL</Term> = the vendor stops actively <em>developing</em> it — no new features or versions — though it may still ship security patches for a while. <Term>EOS</Term> = the vendor stops <em>patching</em> it entirely — running end-of-support gear is a growing security risk you must plan to replace.</>],
+            ["Patches, firmware & OS updates", <>Apply security patches and firmware/OS updates on a schedule for stability and to close vulnerabilities — always with a tested rollback plan and the old firmware saved.</>],
+            ["Decommissioning", <>Retire gear cleanly: sanitize or physically destroy storage media (data really does get dumpster-dived) and update the asset database.</>],
+          ]} />
+
+          <P><span className="font-semibold text-text">Policies &amp; agreements.</span> The rules, and the promises:</P>
+          <DefList items={[
+            ["SLA", <>A <Term>service level agreement</Term> is a contract promising a minimum service level — e.g. an ISP guaranteeing no more than four hours of unscheduled downtime.</>],
+            ["Common policies", <>An <Term>AUP</Term> (acceptable use), plus BYOD, password, and onboarding/offboarding policies, set the rules of the road for users and their devices.</>],
+            ["Agreements: NDA / MOU / SOW", <>An <Term>NDA</Term> protects confidential information; an <Term>MOU</Term> is a non-binding statement of intent; an <Term>SOW</Term> spells out exactly what a vendor will deliver.</>],
+          ]} />
+
           <div className="flex flex-wrap gap-2">
             <Messer slug="network-documentation-n10-009">Network Documentation</Messer>
             <Messer slug="configuration-management-n10-009">Configuration Management</Messer>
@@ -97,15 +130,21 @@ export default function Page() {
         {/* 3.2 MONITORING */}
         <Section id="obj-3-2">
           <SectionTitle objective="3.2" accent={D3}>Network monitoring</SectionTitle>
-          <P>You can&apos;t fix what you can&apos;t see. Two pillars: <Term>SNMP</Term> for device metrics and <Term>syslog</Term> for event messages — usually funneled into a <Term>SIEM</Term> for correlation and alerting.</P>
+          <P>
+            Monitoring just means <span className="text-text">watching the network&apos;s health continuously</span> so problems
+            surface before users report them. The data comes in two forms: <span className="text-text">metrics</span> (numbers
+            sampled over time — CPU, bandwidth, interface errors) and <span className="text-text">logs</span> (messages a device
+            emits when an event happens). <Term>SNMP</Term> gathers the metrics, <Term>syslog</Term> carries the logs, and a{" "}
+            <Term>SIEM</Term> (security information and event management) pulls it all together to correlate and alert.
+          </P>
           <Analogy>a hospital. Syslog severity is triage: a <span className="text-text">0 (Emergency)</span> is a code blue, a <span className="text-text">7 (Debug)</span> is a routine chart note — and confusingly, the <em>lower</em> number is the bigger emergency.</Analogy>
           <DemoFrame title="Syslog severity 0–7" accent={D3}><SyslogSeverity /></DemoFrame>
           <DemoFrame title="SNMP: polling vs traps" accent={D3}><SnmpPollTrap /></DemoFrame>
           <DefList items={[
             ["SNMP internals (MIB / OID / versions)", <>A <Term>MIB</Term> is the device&apos;s database of stats; each value has an <Term>OID</Term> (a numbered object identifier path). <Mono>v1</Mono>/<Mono>v2c</Mono> authenticate with a plaintext <Term>community string</Term> (often <Mono>public</Mono>/<Mono>private</Mono>); <Mono>v3</Mono> adds usernames, authentication, and encryption — always prefer v3.</>],
             ["SIEM", <>Collects logs from everywhere, correlates them, and alerts on patterns (e.g. many failed logins across hosts).</>],
-            ["Flow data vs packet capture", <>Flow (NetFlow / sFlow / IPFIX) summarizes <em>who talked to whom, how much</em>; a packet capture records the actual bytes for deep analysis.</>],
-            ["Port mirroring (SPAN)", <>Copies traffic from one switch port to another so a sniffer/IDS can watch it without being in-line.</>],
+            ["Flow data vs packet capture", <>Flow data (<Term>NetFlow</Term>, plus the sFlow / IPFIX variants — same idea, different vendors) summarizes <em>who talked to whom, how much</em>; a packet capture records the actual bytes for deep analysis.</>],
+            ["Port mirroring (SPAN — Switched Port Analyzer)", <>Copies traffic from one switch port to another so a sniffer/IDS can watch it without being in-line.</>],
             ["Baselines & anomaly alerts", <>Record &ldquo;normal&rdquo; first; then alert when metrics drift from that baseline.</>],
           ]} />
           <PbqBox title="Triage the logs"><SyslogSeverityPBQ /></PbqBox>
@@ -118,7 +157,11 @@ export default function Page() {
         {/* 3.3 DR */}
         <Section id="obj-3-3">
           <SectionTitle objective="3.3" accent={D3}>Disaster recovery</SectionTitle>
-          <P>DR planning is built on two numbers — how much data you can lose (<Term>RPO</Term>) and how long you can be down (<Term>RTO</Term>) — and the recovery site you pay for to hit them.</P>
+          <P>
+            Disaster recovery is your plan for getting back online after something takes the network down — a flood,
+            ransomware, a failed data center. It&apos;s built on two numbers — how much data you can lose (<Term>RPO</Term>)
+            and how long you can be down (<Term>RTO</Term>) — and the recovery site you pay for to hit them.
+          </P>
           <Analogy>RPO is how many pages of your diary you can afford to lose since your last copy; RTO is how fast you must reopen the shop after it closes.</Analogy>
           <DemoFrame title="RPO vs RTO" accent={D3}><RtoRpoTimeline /></DemoFrame>
           <Analogy>a recovery site is a spare car: <span className="text-text">hot</span> = idling in the driveway (drive off instantly), <span className="text-text">warm</span> = parked in the garage (needs fuel and a minute), <span className="text-text">cold</span> = still at the dealership (days to acquire).</Analogy>
@@ -138,9 +181,11 @@ export default function Page() {
             </table>
           </div>
           <DefList items={DR_METRICS.map((m) => [`${m.abbr} — ${m.name}`, <>{m.meaning}</>] as [string, ReactNode])} />
+          <P>How you actually protect the data those RPO numbers depend on:</P>
           <Callout tone="info" title="Backup types">
             <span className="text-text">Full</span> = everything (slow, simple restore). <span className="text-text">Incremental</span> = only what changed since the last backup (fast backup, slower restore). <span className="text-text">Differential</span> = everything since the last full. The <span className="text-text">3-2-1 rule</span>: 3 copies, 2 media, 1 offsite.
           </Callout>
+          <P>Redundancy is the flip side of recovery — it&apos;s how you avoid the outage in the first place:</P>
           <DefList items={[
             ["Active-passive vs active-active", <><Term>Active-passive</Term>: one device handles traffic while a synced standby waits to take over on failure. <Term>Active-active</Term>: both run and share the load — more capacity, but more complex to manage.</>],
             ["Testing the plan", <>A <Term>tabletop exercise</Term> talks a simulated disaster through on paper; <Term>validation tests</Term> actually exercise the failover — ideally without touching production.</>],
@@ -205,13 +250,17 @@ export default function Page() {
         {/* 3.5 ACCESS */}
         <Section id="obj-3-5">
           <SectionTitle objective="3.5" accent={D3}>Access &amp; management methods</SectionTitle>
-          <P>How you reach gear to manage it — and how that path is secured — matters as much as the config itself.</P>
+          <P>
+            Every switch, router, and firewall needs a way for an admin to log in and configure it. This objective is about
+            those <span className="text-text">access paths</span> — how you reach a device normally, how you still reach it
+            when the network is down, and how you keep that path secure.
+          </P>
           <Analogy>out-of-band management is the building&apos;s maintenance entrance: when the front doors (production network) are jammed, you can still get in. A <Term>jump box</Term> is a guarded lobby everyone must pass through to reach the secure floor.</Analogy>
           <DemoFrame title="In-band vs out-of-band · full vs split tunnel" accent={D3}><AccessMethods /></DemoFrame>
           <DefList items={[
             ["In-band vs out-of-band", <>In-band manages over the normal network (SSH to its IP); out-of-band uses a separate path (console, dedicated mgmt port, cellular) that survives an outage.</>],
             ["VPN types", <><Term>Site-to-site</Term> links whole offices always-on; <Term>client-to-site</Term> (remote access) is for individual users; <Term>clientless</Term> runs in a browser over TLS.</>],
-            ["Remote CLI & GUI tools", <>Prefer <Term>SSH</Term> (encrypted, <Mono>tcp/22</Mono>) over <Term>Telnet</Term> (cleartext, <Mono>23</Mono>) for a command line. For a remote desktop use <Term>RDP</Term> (Windows, <Mono>3389</Mono>) or <Term>VNC</Term> (cross-platform, the RFB protocol). A <Term>console</Term> (serial/USB) is the always-available last resort.</>],
+            ["Remote CLI & GUI tools", <>Prefer <Term>SSH</Term> (encrypted, <Mono>tcp/22</Mono>) over <Term>Telnet</Term> (cleartext, <Mono>23</Mono>) for a command line. For a remote desktop use <Term>RDP</Term> (Windows, <Mono>3389</Mono>) or <Term>VNC</Term> (cross-platform remote desktop). A <Term>console</Term> (serial/USB) is the always-available last resort.</>],
             ["Jump box & API management", <>A <Term>jump box / bastion</Term> is the single hardened, audited entry point into a protected segment. At scale, config is increasingly pushed through <Term>REST APIs</Term> instead of logging into each device by hand.</>],
           ]} />
           <PbqBox title="Choose the access method"><AccessMethodPBQ /></PbqBox>
