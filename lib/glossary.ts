@@ -42,6 +42,24 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   ups: { full: "Uninterruptible Power Supply", def: "Battery backup that rides through short outages and smooths surges/sags." },
   pdu: { full: "Power Distribution Unit", def: "The rack's managed power strip — distributes power to each device." },
   "rack unit": { def: "The height unit for rack gear: 1U = 1.75 inches; a full rack is commonly 42U." },
+  connected: { def: "A route to a network the router is directly attached to — the most trusted (administrative distance 0)." },
+  static: { def: "A route you enter by hand (AD 1) — predictable and low-overhead, ideal for small or stable networks." },
+  dynamic: { def: "Routes learned automatically from a routing protocol (OSPF, EIGRP, BGP) that adapt when the network changes." },
+  "static nat": { def: "A permanent one-to-one mapping between a private and a public IP — used to reach an internal server from outside." },
+  "dynamic nat": { def: "A pool of public IPs handed out to internal hosts as needed, with no fixed mapping." },
+  "virtual ip": { full: "Virtual IP (VIP)", def: "A shared gateway IP presented by FHRP routers; it keeps working even if the active router fails." },
+  "vlan-hopping": { def: "An attack that pushes a device's traffic into a VLAN it shouldn't reach — often by abusing a native-VLAN mismatch." },
+  "router-on-a-stick": { def: "Inter-VLAN routing over one trunk link to a router, with a subinterface handling each VLAN." },
+  "root port": { def: "The port on a non-root switch with the best path toward the root bridge — normally in the forwarding state." },
+  "designated port": { def: "The single forwarding port chosen for each network segment in spanning tree." },
+  "duplex mismatch": { def: "One end of a link at full-duplex and the other at half — causes late collisions, CRC errors, and crawling throughput." },
+  "jumbo frames": { def: "Ethernet frames larger than the standard 1500 bytes (~9000), for storage/backup throughput — must be enabled on every hop." },
+  "aes-ccmp": { full: "AES Counter Mode with CBC-MAC Protocol", def: "WPA2's encryption — AES in Counter Mode with CBC-MAC. Strong, though WPA2's handshake can be guessed offline." },
+  "aes-gcmp": { full: "AES Galois/Counter Mode Protocol", def: "WPA3's encryption — AES in Galois/Counter Mode, stronger than WPA2's CCMP." },
+  enterprise: { def: "WPA2/3-Enterprise — each user authenticates individually via 802.1X to a RADIUS server, instead of one shared password." },
+  lightweight: { def: "A lightweight access point does just the radio; a wireless LAN controller (WLC) handles its config and intelligence centrally." },
+  generator: { def: "A backup generator supplies power through long outages — a UPS only bridges the gap until the generator starts." },
+  "fire suppression": { def: "Data-center fire systems use clean-agent gas or chemicals (not water) so they don't destroy the electronics." },
 
   // ---- 3.1 Documentation & processes -------------------------------------
   physical: { def: "A network diagram showing the real cabling, racks, ports, and devices — the literal wiring." },
@@ -127,6 +145,15 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   "rest apis": { full: "REST Application Programming Interfaces", def: "Programmable HTTP endpoints used to configure many devices at once instead of logging into each by hand." },
   "rest api": { full: "REST Application Programming Interface", def: "A programmable HTTP endpoint used to configure devices in bulk instead of by hand." },
 };
+
+// aliases: extra display forms that should resolve to an existing entry
+GLOSSARY["switched virtual interface"] = GLOSSARY.svi;
+GLOSSARY["switched virtual interface (svi)"] = GLOSSARY.svi;
+GLOSSARY["power over ethernet"] = GLOSSARY.poe;
+GLOSSARY["rack units"] = GLOSSARY["rack unit"];
+GLOSSARY["rack units (u)"] = GLOSSARY["rack unit"];
+GLOSSARY["ccmp"] = GLOSSARY["aes-ccmp"];
+GLOSSARY["gcmp"] = GLOSSARY["aes-gcmp"];
 
 /** Normalize <Term> children text to a glossary key. Returns the entry or undefined. */
 export function lookupTerm(children: unknown): GlossaryEntry | undefined {

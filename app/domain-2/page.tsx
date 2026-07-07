@@ -270,10 +270,16 @@ export default function Page() {
         <Section id="obj-2-3">
           <SectionTitle objective="2.3" accent={D2}>Wireless</SectionTitle>
           <P>
-            Wi-Fi runs on <Term>2.4 GHz</Term> (farther reach, more interference, slower),
-            <Term> 5 GHz</Term> (faster, shorter range), and <Term>6 GHz</Term> (opened by Wi-Fi 6E, also used by Wi-Fi 7 —
-            lots of clean spectrum). The generation map is the exam shortcut: <Mono>n</Mono> = Wi-Fi 4, <Mono>ac</Mono> = Wi-Fi 5,
-            <Mono>ax</Mono> = Wi-Fi 6/6E, <Mono>be</Mono> = Wi-Fi 7. Know the standards:
+            Wireless networking connects devices with radio waves instead of cables — so every nearby access point shares the
+            same airspace, and the whole game is picking a <span className="text-text">frequency band</span> and{" "}
+            <span className="text-text">channel</span> that don&apos;t collide with the neighbors. Wi-Fi runs on{" "}
+            <Term>2.4 GHz</Term> (farther reach, more interference, slower), <Term>5 GHz</Term> (faster, shorter range), and{" "}
+            <Term>6 GHz</Term> (the newest band — lots of clean, uncrowded spectrum).
+          </P>
+          <P>
+            Each Wi-Fi generation is really an <Mono>802.11</Mono> standard; the generation names are just the exam shortcut —{" "}
+            <Mono>n</Mono> = Wi-Fi 4, <Mono>ac</Mono> = Wi-Fi 5, <Mono>ax</Mono> = Wi-Fi 6/6E, <Mono>be</Mono> = Wi-Fi 7.
+            Know the standards:
           </P>
           <div className="overflow-hidden rounded-lg border border-line-soft">
             <table className="w-full text-left text-sm">
@@ -302,7 +308,7 @@ export default function Page() {
             ["Channel width", <><Mono>20 / 40 / 80 / 160 MHz</Mono> — wider channels carry more speed but leave fewer non-overlapping options and pick up more interference. 2.4 GHz realistically sticks to 20 MHz.</>],
             ["Band steering", <>Nudges dual-band clients onto the less-congested band (usually 5 or 6 GHz) instead of camping on crowded 2.4 GHz.</>],
             ["Security: WPA2 vs WPA3", <>WPA2 encrypts with <Term>AES-CCMP</Term>; WPA3 uses <Term>AES-GCMP</Term> plus the <Term>SAE</Term> handshake (kills WPA2&apos;s offline password guessing). <Term>PSK</Term> = one shared password (home); <Term>Enterprise</Term> = per-user logins via 802.1X/RADIUS.</>],
-            ["AP types", <>Autonomous APs are configured one-by-one; <Term>lightweight</Term> APs are managed centrally by a <Term>WLC</Term> (wireless LAN controller) over <Mono>CAPWAP</Mono>.</>],
+            ["AP types", <>Autonomous APs are configured one-by-one; <Term>lightweight</Term> APs are managed centrally by a <Term>WLC</Term> (wireless LAN controller) over <Mono>CAPWAP</Mono> (the AP-to-controller protocol).</>],
             ["Antennas", <>Omnidirectional spreads signal all around; directional (Yagi, parabolic) focuses it for point-to-point links.</>],
             ["Survey & placement", <>A site survey / heat map finds dead spots and interference before you mount APs.</>],
           ]} />
@@ -322,8 +328,10 @@ export default function Page() {
         <Section id="obj-2-4">
           <SectionTitle objective="2.4" accent={D2}>Physical installations</SectionTitle>
           <P>
-            Where gear physically lives matters. The <Term>MDF</Term> is the building&apos;s main equipment room; each floor or
-            wing has an <Term>IDF</Term> wired back to it. Inside, everything mounts in racks measured in <Term>rack units (U)</Term>.
+            This objective is the physical side of a network install — where the equipment lives, how it&apos;s powered, and
+            how the room is kept alive. Gear is concentrated in wiring rooms: the <Term>MDF</Term> is the building&apos;s main
+            equipment room, and each floor or wing has an <Term>IDF</Term> wired back to it. Inside, everything mounts in racks
+            measured in <Term>rack units (U)</Term>.
           </P>
           <DemoFrame title="Inside the rack" accent={D2}><RackDiagram /></DemoFrame>
           <DefList items={[
